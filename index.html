@@ -750,97 +750,68 @@ const API_PROVIDERS = {
   custom: { endpoint: '' }
 };
 
-function buildApiPrompt(topic) { return `你是骰评·Economic Atlas 的经济分析引擎（V2）。分析以下经济现象的核心冲突张力。
+function buildFieldPrompt(topic) {
+  return `你是经济结构分析师。分析以下现象的核心冲突张力。
 
 **问题：${topic}**
 
-## 任务（4 步）
+## 任务
+1. 识别 2-3 个核心冲突轴（Conflict Axes），每条是一个张力对，如"成本转移 vs 政策吸收"，列出 2-3 个具体机制。
+2. 从 10 个理论透镜中选择最匹配的 1 个。
+3. 生成 4-5 步因果链。
 
-第一步：识别 2-3 个核心冲突轴（Conflict Axes）。每个冲突轴是一对张力——如"成本转移 vs 政策吸收"、"规则主导权 vs 发展空间"。每个轴下列出 2-3 个具体的运行机制。
+## 理论透镜
+institutional: 制度经济学 | world_systems: 世界体系理论 | marx: 马克思主义政治经济学
+geo_economics: 地缘经济学 | dependency: 依附理论 | neoliberal_critique: 新自由主义批判
+regulation: 调节学派 | realism: 现实主义政治经济学 | keynesian: 凯恩斯主义 | behavioral: 行为/叙事经济学
 
-第二步：从 10 个理论透镜中选择最匹配的 1 个（见下方理论框架）。
-
-第三步：生成一条因果链（4-5步），每一步是一个具体的机制/制度/行为，用 → 连接。
-
-第四步：写一篇 300-500 字的分析，严格遵循 6 条写作规则。
-
-## 结构场参考（可选使用，共 9 格）
-production: 生产（劳动·技术·资本·效率）
-distribution: 分配（收入·财富·税收）
-demand: 需求（消费·投资·政府·外需）
-pricing: 价格（市场价·资产价·信用价）
-finance: 金融（利率·杠杆·信贷·泡沫）
-institution: 制度（政策·法规·国家能力）
-narrative: 叙事（信心·预期·故事）
-cycle: 周期（扩张·过热·衰退·重构）
-external: 外部（贸易·汇率·地缘·冲击）
-
-## 理论框架（10 个透镜）
-- institutional: 制度经济学（激励结构·产权·路径依赖·交易成本）
-- marx: 马克思主义政治经济学（剩余价值·资本积累·生产关系·剥削）
-- world_systems: 世界体系理论（核心-边缘·不平等交换·结构依赖）
-- geo_economics: 地缘经济学（战略竞争·技术脱钩·供应链武器化）
-- neoliberal_critique: 新自由主义批判（市场原教旨·金融化·治理术）
-- regulation: 调节学派（积累体制·调节模式·制度形式）
-- dependency: 依附理论（依附性发展·技术依赖·贸易条件恶化）
-- realism: 现实主义政治经济学（权力·相对收益·安全困境）
-- keynesian: 凯恩斯主义（总需求·流动性·有效需求不足）
-- behavioral: 行为/叙事经济学（预期·羊群效应·叙事传播）
-
-## 写作规则
-
-必须遵守以下 6 条：
-
-1. 机制锚定（不是理论介绍）
-   第一句必须是一个不可替换的具体机制/制度/事件。把"${topic}"换成另一个话题，这句话就说不通。
-   坏：「价格信号和激励机制决定了市场行为」← 任何话题都能这么说
-   好：「欧盟碳边境调节机制通过碳排放权定价将气候成本嵌入贸易规则」← 只对特定话题成立
-
-2. 每句最多一个抽象概念
-   提出一个理论词（路径依赖、激励结构、交易成本），立刻用下一个句子举出一个具体机制来解释它。
-   坏：「双方激励结构高度不对称」→ 然后不解释。好：「双方激励结构高度不对称——欧盟已投入数千亿欧元推进绿色新政，若放弃CBAM将面临制度沉没成本与政治信誉损失。」
-
-3. 概念从现象中推导（理论后置）
-   先描述具体机制/事件，再用理论词给它命名。不要先抛理论再找例子。
-   坏：「从制度经济学视角看，路径依赖解释了...」
-   好：「欧盟已投入数千亿欧元推进绿色新政，若放弃CBAM将面临制度沉没成本——这种路径依赖使得短期退出的成本高于继续冲突。」
-
-4. 一个反观点（不是"两者不矛盾"和解）
-   在论证主干之后，提出一个认真对待的反面论证——不是"两种理论都成立"，而是一个真正可能推翻主干的观察。
-   坏：「凯恩斯主义和制度经济学并不冲突，它们描述了同一结构的不同层面。」
-   好：「但存在一个反例：如果中国制造业足够强，以至于碳价成本被规模效应吸收，CBAM的壁垒作用将大幅下降——冲突的根源可能不在制度，而在技术效率。」
-
-5. 收束用判断，不用提问
-   不要用「真正的问题是……？」结束。给出一个有明确视角的判断，即使这个判断是"路径未确定"——也要说是哪两条路径在竞争。
-   坏：「真正的问题是谁来定义现实？」
-   好：「冲突的未来分岔为两条路：如果碳捕集技术突破，CBAM的成本约束将瓦解，冲突降级为技术竞争；如果WTO改革失败，碳关税将固化为主权工具，经济脱钩从风险变为结构。」
-
-6. 因果链的每一步都要出现在正文中
-   你生成的 causal_chain 中每一个节点必须是对正文中实际提到的一个机制的压缩命名。不能生造因果链然后正文里不出现。
-
-## 输出格式（纯 JSON，只输出 JSON，禁止省略任何字段）
+## 输出格式（纯 JSON，只输出 JSON，不输出其他内容）
 {
-  "conflict_axes": [
-    {"axis":"成本转移 vs 政策吸收","mechanisms":["碳关税","补贴竞赛","产业回流"]}
-  ],
+  "conflict_axes": [{"axis":"张力A vs 张力B","mechanisms":["机制1","机制2"]}],
   "theory_lens": "institutional",
-  "causal_chain": ["碳边境调节","出口成本上升","供应链转移","脱钩制度化"],
-  "insight": "一句话洞察（20-40字）",
-  "essay": "300-500字分析正文（6条规则全部适用）",
-  "competing_views": [
-    {"lens":"world_systems","claim":"核心国家通过碳规则固化边缘国家的产业依附"},
-    {"lens":"marx","claim":"碳排放权本质是剩余价值分配机制的环境化"}
-  ]
-}
+  "causal_chain": ["步骤1","步骤2","步骤3","步骤4"]
+}`; }
 
-要求：
-- conflict_axes 必须有 2 到 3 条
-- 每个 mechanisms 必须包含 2 到 3 个具体机制
-- theory_lens 必须是 10 个理论 key 之一
-- causal_chain 必须有 4 到 5 步
-- insight 必须 20-40 字
-- essay 必须 300-500 字
-- competing_views 必须包含 2 条其他理论的解释，每条有 lens 和 claim 字段`; }
+function buildEssayPrompt(topic, axisData) {
+  const lensName = (THEORY_LENSES[axisData.theory_lens] && THEORY_LENSES[axisData.theory_lens].name) || axisData.theory_lens;
+  const axisText = (axisData.conflict_axes || []).map(a => a.axis).join('；');
+  const chain = (axisData.causal_chain || []).join(' → ');
+
+  return `你是骰评·Economic Atlas 的经济评论引擎。基于以下分析框架写一篇分析。
+
+## 当前话题
+${topic}
+
+## 分析框架（已确定，必须使用）
+核心冲突轴：${axisText}
+因果链：${chain}
+理论透镜：${lensName}
+
+## 写作规则（6 条）
+1. 机制锚定：第一句必须是一个不可替换的具体机制/制度/事件。
+2. 每句最多一个抽象概念：提出理论词后紧跟具体机制解释。
+3. 理论后置：先描述机制/事件，再用理论词命名。
+4. 一个反观点：认真对待一个可能推翻主干的观察，不用"两种理论都成立"。
+5. 收束用判断：给出有明确视角的判断，不用提问。
+6. 因果链每一步出现在正文中。
+
+## 输出格式（纯 JSON，不输出其他内容）
+{
+  "insight": "一句话洞察（20-40字）",
+  "essay": "300-500字分析",
+  "competing_views": [
+    {"lens":"world_systems","claim":"用另一个理论视角解释同一现象"},
+    {"lens":"marx","claim":"用第三个理论视角解释同一现象"}
+  ]
+}`; }
+
+function callApi(endpoint, apiKey, model, prompt, maxTok) {
+  return fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], temperature: 0.6, max_tokens: maxTok || 300 })
+  });
+}
 
 async function callApiForEconomy(topic) {
   const apiKey = document.getElementById('apiKey').value.trim();
@@ -856,26 +827,37 @@ async function callApiForEconomy(topic) {
   if (!endpoint) return null;
 
   try {
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: buildApiPrompt(topic) }], temperature: 0.7, max_tokens: 1600 })
-    });
-    if (!response.ok) return null;
-    const data = await response.json();
-    const text = data.choices?.[0]?.message?.content?.trim() || '';
-    if (!text) return null;
-    let jsonStr = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
-    const result = JSON.parse(jsonStr);
-    // 校验：必须有核心字段
-    if (!result.theory_lens || !result.causal_chain || !result.essay || result.causal_chain.length === 0) {
-      console.warn('API 返回不完整，回退模板引擎', result);
+    // === 第一轮：冲突轴 + 理论 + 因果链 ===
+    const res1 = await callApi(endpoint, apiKey, model, buildFieldPrompt(topic));
+    if (!res1.ok) return null;
+    const d1 = await res1.json();
+    const t1 = d1.choices?.[0]?.message?.content?.trim() || '';
+    if (!t1) return null;
+    let j1 = JSON.parse(t1.replace(/^\`\`\`json\s*/, '').replace(/\s*\`\`\`$/, ''));
+    if (!j1.theory_lens || !j1.causal_chain || j1.causal_chain.length === 0) {
+      console.warn('第一轮 API 不完整', j1);
       return null;
     }
-    return result;
+
+    // === 第二轮：正文 + 洞察 + 竞争观点 ===
+    const res2 = await callApi(endpoint, apiKey, model, buildEssayPrompt(topic, j1), 800);
+    if (!res2.ok) { j1.insight = ''; j1.essay = ''; j1.competing_views = []; return j1; }
+    const d2 = await res2.json();
+    const t2 = d2.choices?.[0]?.message?.content?.trim() || '';
+    if (!t2) { j1.insight = ''; j1.essay = ''; j1.competing_views = []; return j1; }
+    let j2 = JSON.parse(t2.replace(/^\`\`\`json\s*/, '').replace(/\s*\`\`\`$/, ''));
+    j1.insight = j2.insight || '';
+    j1.essay = j2.essay || '';
+    j1.competing_views = j2.competing_views || [];
+
+    // 最终校验
+    if (!j1.essay || j1.essay.length < 80) {
+      console.warn('第二轮 API 正文太短');
+      return null;
+    }
+    return j1;
   } catch(err) { console.error('API调用失败:', err); return null; }
 }
-
 // ============================================================
 // === 主流程 ===
 // ============================================================
@@ -935,18 +917,26 @@ async function startAnalysis() {
 function reroll() {
   if (!currentTopic) return;
   const match = matchEconomyEntry(currentTopic);
-  const dice = rollDice(match);
-  const essay = generateEssay(currentTopic, dice);
-  const result = {
-    activeFields: dice.activeFields,
-    activeLens: dice.activeLens,
-    chain: dice.chain,
-    insight: dice.insight,
-    essay: essay,
-    alts: dice.alts,
-    isApi: false,
-    match: match
-  };
+    const dice = rollDice(match);
+    const essay = generateEssay(currentTopic, dice);
+    const conflict_axes = (match && match.key_conflicts && match.key_conflicts.length > 0)
+      ? match.key_conflicts.map((c, i) => ({
+          axis: c.includes('vs') ? c : c,
+          mechanisms: match.key_actors ? match.key_actors.slice(i * 2, i * 2 + 2) : []
+        }))
+      : [];
+    const result = {
+      activeFields: dice.activeFields,
+      activeLens: dice.activeLens,
+      chain: dice.chain,
+      insight: dice.insight,
+      essay: essay,
+      alts: dice.alts,
+      isApi: false,
+      match: match,
+      conflict_axes: conflict_axes,
+      competing_views: []
+    };
   currentResult = result;
   renderResult(result);
 }
