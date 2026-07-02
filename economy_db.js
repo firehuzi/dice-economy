@@ -227,7 +227,20 @@ const ECONOMY_DB = {
     theory_fit: { institutional:5, marx:4, behavioral:4, keynesian:3, neoclassical:1 },
     key_conflicts: ["土地财政依赖","居民杠杆","城镇化尾声","住房不炒与稳经济"],
     key_actors: ["地方政府","开发商","刚需族","央行"]
+  },
+
+  // ── 当代中国（1 条补充）──
+
+  "中国产能过剩": {
+    economy: "中国", period: "2015-2026",
+    focus: "投资驱动·地方政府债务·产能过剩与内需不足",
+    keywords: ["产能过剩","供给过剩","新能源车","光伏产能","房地产","地方政府债务","内需不足","出口导向","过剩产能","通缩"],
+    structure_weights: { production:90, distribution:65, demand:70, pricing:75, finance:60, institution:85, narrative:65, cycle:55, external:85 },
+    theory_fit: { institutional:5, marx:4, keynesian:3, behavioral:2, neoclassical:2 },
+    key_conflicts: ["投资驱动vs消费驱动","出口依赖vs内需","地方政府债务","产能输出vs贸易摩擦"],
+    key_actors: ["地方政府","国有企业","出口市场","内需市场"]
   }
+
 };
 
 // === 匹配引擎 ===
@@ -238,14 +251,30 @@ function matchEconomyEntry(userInput) {
 
   for (const [name, entry] of Object.entries(ECONOMY_DB)) {
     let score = 0;
-    const terms = [name, entry.economy, entry.period, entry.focus, ...(entry.keywords || [])];
-    for (const t of terms) {
-      if (lower.includes(t.toLowerCase())) score += 30;
+
+    // 关键：长关键词得分高（如"一带一路"得50分，"中国"只得5分）
+    for (const kw of (entry.keywords || [])) {
+      if (lower.includes(kw.toLowerCase())) {
+        score += kw.length >= 4 ? 40 : 25;  // 4字+关键词权重更高
+      }
     }
-    // 经济体名部分匹配
-    if (lower.includes(entry.economy)) score += 20;
+
+    // 条目名匹配（专门名称如"马歇尔计划"权重最高）
+    if (lower.includes(name.toLowerCase())) score += 45;
+
+    // 经济体名只是微弱加分（泛词惩罚）
+    if (entry.economy && lower.includes(entry.economy.toLowerCase())) {
+      score += 5;
+    }
+
+    // 聚焦词匹配（也是专门词）
+    const focusTerms = (entry.focus || '').split(/[·、]/);
+    for (const ft of focusTerms) {
+      if (ft.length >= 3 && lower.includes(ft.toLowerCase())) score += 30;
+    }
+
     if (score > bestScore) { bestScore = score; best = { name, ...entry }; }
   }
 
-  return bestScore > 0 ? best : null;
+  return bestScore >= 15 ? best : null;  // 阈值：至少命中一个专门关键词
 }
