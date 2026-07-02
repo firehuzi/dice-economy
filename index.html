@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>骰评 · Economic Atlas — Every Reality Holds More Than One Truth.</title>
+<style>
+:root {
+  --black: #1A1A1A;
+  --ink: #2A2A2A;
+  --grey: #666;
+  --light-grey: #999;
+  --border: #DDD;
+  --bg: #FAFAF8;
+  --accent: #1A1A1A;
+  --highlight: #F5F0E8;
+  --serif: 'Noto Serif SC', 'Songti SC', serif;
+  --sans: 'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--serif); background: var(--bg); color: var(--black); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+
+.home-screen { max-width: 480px; width: 100%; text-align: center; }
+.home-screen.hidden { display: none; }
+.brand { font-size: 1.8rem; font-weight: 700; letter-spacing: 0.08em; margin-bottom: 0.3rem; }
+.brand-sub { font-size: 0.7rem; color: var(--grey); margin-bottom: 2rem; font-family: var(--sans); font-style: italic; }
+.input-box { width: 100%; padding: 0.8rem 1rem; font-family: var(--serif); font-size: 1rem; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.8rem; outline: none; background: var(--bg); }
+.input-box:focus { border-color: var(--accent); }
+.roll-btn { width: 100%; padding: 0.8rem; font-family: var(--sans); font-size: 1rem; background: var(--black); color: #fff; border: none; border-radius: 6px; cursor: pointer; letter-spacing: 0.05em; }
+.roll-btn:hover { opacity: 0.85; }
+
+.settings-toggle { font-family: var(--sans); font-size: 0.7rem; color: var(--grey); cursor: pointer; margin-top: 1.5rem; text-decoration: underline; }
+.settings-panel { display: none; margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; text-align: left; }
+.settings-panel.open { display: block; }
+.settings-row { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; align-items: center; }
+.settings-row label { font-family: var(--sans); font-size: 0.7rem; color: var(--grey); min-width: 60px; }
+.settings-row select, .settings-row input { flex: 1; padding: 0.4rem; font-size: 0.8rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); font-family: var(--sans); }
+
+.result-screen { max-width: 640px; width: 100%; display: none; flex-direction: column; gap: 1rem; }
+.result-screen.active { display: flex; }
+.result-header { display: flex; justify-content: space-between; align-items: center; }
+.back-btn { font-family: var(--sans); font-size: 0.75rem; color: var(--grey); cursor: pointer; text-decoration: underline; }
+
+.section-label { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+.structure-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; }
+.structure-cell { padding: 0.5rem 0.4rem; border: 1px solid var(--border); border-radius: 4px; text-align: center; font-family: var(--sans); font-size: 0.65rem; color: var(--grey); transition: all 0.3s; }
+.structure-cell.active { border-color: var(--accent); background: var(--highlight); color: var(--black); font-weight: 600; }
+.structure-cell .sc-label { display: block; }
+.structure-cell .sc-detail { font-size: 0.55rem; color: var(--light-grey); margin-top: 0.15rem; }
+
+.theory-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.theory-tag { padding: 0.35rem 0.7rem; border: 1px solid var(--border); border-radius: 4px; font-family: var(--sans); font-size: 0.7rem; color: var(--grey); cursor: default; transition: all 0.3s; }
+.theory-tag.active { border-color: var(--accent); background: var(--black); color: #fff; font-weight: 600; }
+
+.dice-path { padding: 1rem; border: 1px solid var(--border); border-radius: 8px; background: var(--highlight); }
+.dice-path-title { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+.dice-chain { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.dice-step { padding: 0.3rem 0.6rem; background: var(--black); color: #fff; border-radius: 4px; font-family: var(--sans); font-size: 0.7rem; }
+.dice-arrow { color: var(--grey); font-size: 0.8rem; }
+.dice-insight { margin-top: 0.6rem; font-size: 0.82rem; color: var(--ink); font-style: italic; line-height: 1.6; }
+
+.essay-section { margin-top: 0.5rem; }
+.essay-topic { font-family: var(--serif); font-size: 1.2rem; font-weight: 700; color: var(--black); margin-bottom: 1rem; }
+.essay-text { font-size: 0.85rem; line-height: 1.8; color: var(--ink); }
+
+.alt-paths { margin-top: 1rem; padding: 0.8rem; border: 1px dashed var(--border); border-radius: 8px; }
+.alt-paths-title { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+.alt-path-row { font-size: 0.75rem; color: var(--grey); margin-bottom: 0.3rem; line-height: 1.5; }
+
+.action-bar { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
+.action-btn { padding: 0.5rem 1rem; font-family: var(--sans); font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); cursor: pointer; }
+.action-btn:hover { border-color: var(--accent); }
+.action-btn.primary { background: var(--black); color: #fff; border-color: var(--black); }
+.action-btn.copied { background: #2A7; color: #fff; border-color: #2A7; }
+
+.engine-badge { font-family: var(--sans); font-size: 0.6rem; color: var(--light-grey); text-align: center; margin-top: 1rem; }
+@media (max-width: 520px) {
+  body { padding: 1rem; }
+  .structure-grid { grid-template-columns: repeat(3, 1fr); }
+}
+</style>
+</head>
+<body>
+
+<div class="home-screen" id="homeScreen">
+  <div class="brand">骰评 · Economic Atlas</div>
+  <div class="brand-sub">Every Reality Holds More Than One Truth.</div>
+  <input type="text" class="input-box" id="topicInput" placeholder="输入一个经济问题或现象，例如：房价为什么持续上涨？">
+  <button class="roll-btn" onclick="startAnalysis()">🎲 生成骰评</button>
+  <div class="settings-toggle" onclick="toggleSettings()">⚙ 引擎与模型设置</div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-row"><label>引擎</label><select id="engineMode" onchange="onEngineChange()"><option value="template">模板引擎</option><option value="api">AI 引擎（API）</option></select></div>
+    <div class="settings-row api-only"><label>Provider</label><select id="apiProvider" onchange="onProviderChange()"><option value="deepseek">DeepSeek</option><option value="openai">OpenAI</option><option value="ollama">Ollama（本地）</option><option value="custom">自定义</option></select></div>
+    <div class="settings-row api-only"><label>Model</label><input id="apiModel" value="deepseek-chat" placeholder="deepseek-chat"></div>
+    <div class="settings-row api-only"><label>Endpoint</label><input id="apiEndpoint" placeholder="https://api.deepseek.com/v1/chat/completions"></div>
+    <div class="settings-row api-only"><label>API Key</label><input type="password" id="apiKey" placeholder="sk-..."></div>
+  </div>
+</div>
+
+<div class="result-screen" id="resultScreen">
+  <div class="result-header">
+    <span class="back-btn" onclick="goHome()">← 返回首页</span>
+  </div>
+
+  <div class="essay-topic" id="resultTopic"></div>
+  <div class="match-info" id="resultMatch" style="display:none;font-family:var(--sans);font-size:0.65rem;color:var(--grey);margin-top:-0.5rem;margin-bottom:0.8rem;padding-left:0.2rem;border-left:2px solid var(--accent);"></div>
+
+  <div class="section-label">🧱 结构场（9格经济分解）</div>
+  <div class="structure-grid" id="structureGrid"></div>
+
+  <div class="section-label">🧠 理论视角</div>
+  <div class="theory-bar" id="theoryBar"></div>
+
+  <div class="dice-path">
+    <div class="dice-path-title">🎲 骰子路径</div>
+    <div class="dice-chain" id="diceChain"></div>
+    <div class="dice-insight" id="diceInsight"></div>
+  </div>
+
+  <div class="alt-paths" id="altPaths">
+    <div class="alt-paths-title">🔀 其他可能的解释路径</div>
+    <div id="altPathsContent"></div>
+  </div>
+
+  <div class="essay-section">
+    <div class="essay-text" id="essayText"></div>
+  </div>
+
+  <div class="action-bar">
+    <button class="action-btn primary" onclick="reroll()">🎲 再掷一次（换路径）</button>
+    <button class="action-btn" onclick="copyEssay()">复制全文</button>
+    <button class="action-btn" onclick="copyShort()">复制摘要</button>
+  </div>
+  <div class="engine-badge" id="engineBadge"></div>
+</div>
+
+<script>
+// ============================================================
+// === 9 大经济结构场 ===
+// ============================================================
+const STRUCTURE_FIELDS = {
+  production:   { label:'生产', detail:'劳动·技术·资本·效率', desc:'谁生产、如何生产、生产效率的变化' },
+  distribution: { label:'分配', detail:'收入·财富·税收', desc:'财富和收入在群体之间的分布' },
+  demand:       { label:'需求', detail:'消费·投资·政府·外需', desc:'谁在消费、投资和支出的结构' },
+  pricing:      { label:'价格', detail:'市场价·资产价·信用价', desc:'各类价格的信号功能和扭曲' },
+  finance:      { label:'金融', detail:'利率·杠杆·信贷·泡沫', desc:'货币、信贷和资产市场的传导' },
+  institution:  { label:'制度', detail:'政策·法规·国家能力', desc:'规则、激励和国家能力的约束' },
+  narrative:    { label:'叙事', detail:'信心·预期·故事', desc:'信念、预期和集体叙事如何驱动行为' },
+  cycle:        { label:'周期', detail:'扩张·过热·衰退·重构', desc:'经济波动的时间节奏和转折点' },
+  external:     { label:'外部', detail:'贸易·汇率·地缘·冲击', desc:'全球经济系统的外部约束和冲击' }
+};
+
+// ============================================================
+// === 5 大理论框架 ===
+// ============================================================
+const THEORY_LENSES = {
+  marx: {
+    name: '马克思主义',
+    terms: ['阶级','剩余价值','资本积累','商品化','生产关系','剥削','异化'],
+    template: (topic, fields) => `在马克思主义视角下，${topic}本质上是资本逻辑在${fields}领域的展开。剩余价值的吸收机制、资本积累的内在驱动、以及阶级关系的再生产，共同塑造了${topic}的深层动力。这不是市场失灵的问题，而是资本运行的内在必然。`
+  },
+  neoclassical: {
+    name: '新古典/新自由主义',
+    terms: ['市场效率','理性选择','均衡','价格信号','激励','边际分析'],
+    template: (topic, fields) => `从新古典经济学出发，${topic}可以被理解为市场参与者在${fields}领域内理性选择的宏观聚合。价格信号、激励机制和资源配置效率共同决定了${topic}的演变。问题不在于系统本身，而在于是否存在阻碍市场机制运行的扭曲。`
+  },
+  keynesian: {
+    name: '凯恩斯主义',
+    terms: ['总需求','流动性','政府干预','经济波动','有效需求不足','乘数效应'],
+    template: (topic, fields) => `凯恩斯主义的分析聚焦于${topic}背后的有效需求问题。在${fields}领域，总需求的波动、流动性的分配不均以及预期的自我实现机制，构成了${topic}的核心驱动力。市场不会自动回归均衡——需要外部力量的干预。`
+  },
+  institutional: {
+    name: '制度经济学',
+    terms: ['激励结构','产权','交易成本','路径依赖','正式/非正式规则','制度锁定'],
+    template: (topic, fields) => `制度经济学的视角强调${topic}背后的规则系统。${fields}领域的激励设计、产权安排和历史路径依赖，解释了为什么${topic}不是纯粹的市场结果，而是特定制度框架下的均衡产出。改变规则，就能改变结果。`
+  },
+  behavioral: {
+    name: '行为/叙事经济学',
+    terms: ['预期','心理','羊群效应','叙事传播','认知偏差','FOMO'],
+    template: (topic, fields) => `行为经济学揭示了一个被传统模型忽视的维度：${topic}不仅仅是理性计算的结果，更是${fields}领域内集体心理、叙事传播和认知偏差的产物。人们不总是对现实做反应——他们对自己相信的叙事做反应。`
+  }
+};
+
+// ============================================================
+// === 全局状态 ===
+// ============================================================
+let currentTopic = '';
+let currentResult = null;
+let engineMode = 'template';
+
+// ============================================================
+// === UI 控制 ===
+// ============================================================
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+}
+function onEngineChange() {
+  engineMode = document.getElementById('engineMode').value;
+}
+function onProviderChange() {
+  const p = document.getElementById('apiProvider').value;
+  const ep = document.getElementById('apiEndpoint');
+  const m = document.getElementById('apiModel');
+  if (p === 'deepseek') { ep.value = 'https://api.deepseek.com/v1/chat/completions'; m.value = 'deepseek-chat'; }
+  else if (p === 'openai') { ep.value = 'https://api.openai.com/v1/chat/completions'; m.value = 'gpt-4o-mini'; }
+  else if (p === 'ollama') { ep.value = 'http://localhost:11434/v1/chat/completions'; m.value = 'hermes3:8b'; }
+  else { ep.value = ''; m.value = ''; }
+}
+
+function goHome() {
+  document.getElementById('resultScreen').classList.remove('active');
+  document.getElementById('homeScreen').classList.remove('hidden');
+  document.getElementById('topicInput').focus();
+}
+
+// ============================================================
+// === 骰子引擎（数据库加权） ===
+// ============================================================
+function weightedPick(items, weights, count) {
+  // 加权不放回抽样
+  const pool = items.map((item, i) => ({ item, weight: (weights[i] || 50) }));
+  const result = [];
+  for (let n = 0; n < count && pool.length > 0; n++) {
+    const total = pool.reduce((s, p) => s + p.weight, 0);
+    let r = Math.random() * total;
+    let idx = 0;
+    for (let i = 0; i < pool.length; i++) {
+      r -= pool[i].weight;
+      if (r <= 0) { idx = i; break; }
+    }
+    result.push(pool[idx].item);
+    pool.splice(idx, 1);
+  }
+  return result;
+}
+
+function rollDice(match) {
+  const fieldKeys = Object.keys(STRUCTURE_FIELDS);
+  const lensKeys = Object.keys(THEORY_LENSES);
+  const sw = match && match.structure_weights ? match.structure_weights : {};
+  const tf = match && match.theory_fit ? match.theory_fit : {};
+
+  // 用数据库 weights 加权选 2 个结构场
+  const fieldWeights = fieldKeys.map(k => sw[k] != null ? sw[k] + 10 : 50);
+  const activeFields = weightedPick(fieldKeys, fieldWeights, 2);
+
+  // 用数据库 theory_fit 加权选 1 个理论视角
+  const lensWeights = lensKeys.map(k => tf[k] != null ? tf[k] * 15 + 10 : 50);
+  const activeLens = weightedPick(lensKeys, lensWeights, 1)[0];
+
+  const lens = THEORY_LENSES[activeLens];
+  const chain = generateCausalChain(currentTopic, activeFields, activeLens, lens);
+  const insight = generateInsight(currentTopic, activeFields, activeLens, lens);
+
+  // 备选路径
+  const alts = [];
+  const altLenses = lensKeys.filter(k => k !== activeLens);
+  for (let i = 0; i < 2; i++) {
+    const altLens = altLenses[i];
+    const altFields = [fieldKeys[(fieldKeys.indexOf(activeFields[0]) + i + 1) % fieldKeys.length]];
+    const altLensObj = THEORY_LENSES[altLens];
+    alts.push({
+      lens: altLensObj.name,
+      fields: altFields.map(f => STRUCTURE_FIELDS[f].label).join('+'),
+      path: altLensObj.terms.slice(0, 3).join(' → ')
+    });
+  }
+
+  return { activeFields, activeLens, chain, insight, alts, match };
+}
+
+function generateCausalChain(topic, fields, lensKey, lens) {
+  const fLabels = fields.map(f => STRUCTURE_FIELDS[f].label);
+  const terms = lens.terms;
+  const pick = (arr, n) => {
+    const pool = [...arr];
+    const result = [];
+    for (let i = 0; i < n && pool.length > 0; i++) {
+      const idx = Math.floor(Math.random() * pool.length);
+      result.push(pool[idx]);
+      pool.splice(idx, 1);
+    }
+    return result;
+  };
+
+  const selected = pick(terms, Math.min(4, terms.length));
+  return [fLabels[0], ...selected.slice(0, 3)];
+}
+
+function generateInsight(topic, fields, lensKey, lens) {
+  const templates = [
+    `${topic}的根源不在于表面现象，而在于${STRUCTURE_FIELDS[fields[0]].label}与${STRUCTURE_FIELDS[fields[1] ? fields[1] : fields[0]].label}之间的结构张力——${lens.name}揭示了这种张力背后的${lens.terms[0]}逻辑。`,
+    `当${lens.name}的分析框架被应用到${topic}，真正暴露的不是市场失灵或政策失误，而是${STRUCTURE_FIELDS[fields[0]].label}系统内部的${lens.terms[0]}如何通过${lens.terms[1] || '结构'}被制度化地再生产。`,
+    `${topic}在${lens.name}的理论透镜下呈现为一个矛盾结构：${STRUCTURE_FIELDS[fields[0]].label}的运转逻辑与${lens.terms[0]}之间存在着不可约的张力。这不是"谁对谁错"的问题，而是"不同层级在同时运行"。`
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+function generateEssay(topic, result) {
+  const lens = THEORY_LENSES[result.activeLens];
+  const fLabels = result.activeFields.map(f => STRUCTURE_FIELDS[f].label).join('与');
+  const fDescs = result.activeFields.map(f => STRUCTURE_FIELDS[f].desc);
+
+  // 开场
+  const openings = [
+    `${topic}看起来是一个${fLabels}的问题，但实际上它是多重机制叠加的结果。`,
+    `当我们讨论${topic}时，我们很少意识到，同一个现象在不同的理论框架下会呈现出完全不同的因果结构。`,
+    `对${topic}的常规解释往往止步于表面，但${lens.name}的分析工具让我们看到了更深层的结构逻辑。`
+  ];
+
+  // 主干
+  const main = lens.template(topic, fLabels);
+
+  // 对照
+  const altLensKeys = Object.keys(THEORY_LENSES).filter(k => k !== result.activeLens);
+  const altLens = THEORY_LENSES[altLensKeys[Math.floor(Math.random() * altLensKeys.length)]];
+  const counter = `${altLens.name}则会给出一个完全不同的解释：${altLens.template(topic, result.activeFields[0]).substring(0, 100)}……`;
+
+  // 冲突
+  const conflicts = [
+    `${lens.name}和${altLens.name}给出的解释看似矛盾，但真正的问题是：两种解释同时成立——它们描述的不是竞争性的"真相"，而是同一结构的两个不同层级。`,
+    `这两种解释并不互斥。${lens.name}的分析聚焦于${fLabels}的深层结构，而${altLens.name}的视角捕捉了${fLabels}的行为层面。它们共同揭示了一个事实：${topic}不是单一因果链的产物。`
+  ];
+
+  // 收束
+  const closings = [
+    `真正的问题不是"${topic}的原因是什么"，而是：当所有解释都成立时，谁在定义现实？`,
+    `${topic}的多重解释揭示了一个更深的事实：经济现象从来不是"事实"，而是"被选中的解释"。`
+  ];
+
+  return [
+    openings[Math.floor(Math.random() * openings.length)],
+    '',
+    main,
+    '',
+    counter,
+    '',
+    conflicts[Math.floor(Math.random() * conflicts.length)],
+    '',
+    closings[Math.floor(Math.random() * closings.length)]
+  ].join('\n');
+}
+
+// ============================================================
+// === AI 引擎 ===
+// ============================================================
+const API_PROVIDERS = {
+  deepseek: { endpoint: 'https://api.deepseek.com/v1/chat/completions' },
+  openai: { endpoint: 'https://api.openai.com/v1/chat/completions' },
+  ollama: { endpoint: 'http://localhost:11434/v1/chat/completions' },
+  custom: { endpoint: '' }
+};
+
+function buildApiPrompt(topic) {
+  return `你是骰评·经济版的引擎。分析以下经济问题：
+
+**问题：${topic}**
+
+## 任务
+第一步：判断 9 大结构场中哪些对这个现象最关键（输出 key 列表）
+第二步：从 5 个理论框架中选择最匹配的 1 个
+第三步：生成一条因果链（3-4步，用 → 连接）
+第四步：写一篇 300-500 字的结构化经济评论
+
+## 理论框架
+- marx: 马克思主义（阶级、剩余价值、资本积累、商品化）
+- neoclassical: 新古典/新自由主义（市场效率、理性选择、均衡、价格信号）
+- keynesian: 凯恩斯主义（总需求、流动性、政府干预、经济波动）
+- institutional: 制度经济学（激励结构、产权、路径依赖、交易成本）
+- behavioral: 行为/叙事经济学（预期、心理、羊群效应、叙事传播）
+
+## 输出格式（纯 JSON）
+{
+  "structure_fields": ["finance","demand"],
+  "theory_lens": "marx",
+  "causal_chain": ["信贷扩张","资产化住房","阶级固化","居住权商品化"],
+  "insight": "一句话洞察",
+  "essay": "300-500字评论",
+  "alt_paths": [
+    {"lens":"keynesian","path":"流动性过剩 → 资产通胀 → 财富再分配"}
+  ]
+}`;
+}
+
+async function callApiForEconomy(topic) {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const provider = document.getElementById('apiProvider').value;
+  const model = document.getElementById('apiModel').value;
+
+  if (!apiKey && provider !== 'ollama') return null;
+
+  const providerData = API_PROVIDERS[provider];
+  let endpoint = provider === 'custom'
+    ? document.getElementById('apiEndpoint').value.trim()
+    : providerData.endpoint;
+  if (!endpoint) return null;
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: buildApiPrompt(topic) }], temperature: 0.7, max_tokens: 1200 })
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const text = data.choices?.[0]?.message?.content?.trim() || '';
+    if (!text) return null;
+    let jsonStr = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
+    return JSON.parse(jsonStr);
+  } catch(err) { console.error('API调用失败:', err); return null; }
+}
+
+// ============================================================
+// === 主流程 ===
+// ============================================================
+async function startAnalysis() {
+  const topic = document.getElementById('topicInput').value.trim();
+  if (!topic) { document.getElementById('topicInput').focus(); return; }
+  currentTopic = topic;
+
+  document.getElementById('homeScreen').classList.add('hidden');
+  document.getElementById('resultScreen').classList.add('active');
+  document.getElementById('resultTopic').textContent = topic;
+
+  engineMode = document.getElementById('engineMode').value;
+  document.getElementById('engineBadge').textContent = engineMode === 'api' ? 'AI 引擎' : '模板引擎';
+
+  let result;
+  // 匹配数据库
+  const match = matchEconomyEntry(topic);
+
+  if (engineMode === 'api') {
+    const apiResult = await callApiForEconomy(topic);
+    if (apiResult && apiResult.theory_lens) {
+      result = {
+        activeFields: apiResult.structure_fields || ['finance', 'demand'],
+        activeLens: apiResult.theory_lens,
+        chain: apiResult.causal_chain || [],
+        insight: apiResult.insight || '',
+        essay: apiResult.essay || '',
+        alts: apiResult.alt_paths || [],
+        isApi: true
+      };
+    }
+  }
+
+  if (!result) {
+    const dice = rollDice(match);
+    const essay = generateEssay(topic, dice);
+    result = {
+      activeFields: dice.activeFields,
+      activeLens: dice.activeLens,
+      chain: dice.chain,
+      insight: dice.insight,
+      essay: essay,
+      alts: dice.alts,
+      isApi: false,
+      match: match
+    };
+  }
+
+  currentResult = result;
+  renderResult(result);
+}
+
+function reroll() {
+  if (!currentTopic) return;
+  const match = matchEconomyEntry(currentTopic);
+  const dice = rollDice(match);
+  const essay = generateEssay(currentTopic, dice);
+  const result = {
+    activeFields: dice.activeFields,
+    activeLens: dice.activeLens,
+    chain: dice.chain,
+    insight: dice.insight,
+    essay: essay,
+    alts: dice.alts,
+    isApi: false,
+    match: match
+  };
+  currentResult = result;
+  renderResult(result);
+}
+
+// ============================================================
+// === 渲染 ===
+// ============================================================
+function renderResult(result) {
+  // 数据库匹配信息
+  const matchEl = document.getElementById('resultMatch');
+  if (matchEl && result.match) {
+    matchEl.style.display = 'block';
+    matchEl.textContent = '🕰 ' + result.match.economy + ' · ' + result.match.period + ' · ' + result.match.focus;
+  } else if (matchEl) {
+    matchEl.style.display = 'none';
+  }
+
+  // 结构场
+  const grid = document.getElementById('structureGrid');
+  grid.innerHTML = Object.entries(STRUCTURE_FIELDS).map(([k, v]) => {
+    const active = result.activeFields.includes(k) ? ' active' : '';
+    return `<div class="structure-cell${active}"><span class="sc-label">${v.label}</span><span class="sc-detail">${v.detail}</span></div>`;
+  }).join('');
+
+  // 理论标签
+  const bar = document.getElementById('theoryBar');
+  bar.innerHTML = Object.entries(THEORY_LENSES).map(([k, v]) => {
+    const active = k === result.activeLens ? ' active' : '';
+    return `<div class="theory-tag${active}">${v.name}</div>`;
+  }).join('');
+
+  // 骰子路径
+  const chain = document.getElementById('diceChain');
+  chain.innerHTML = result.chain.map((step, i) => {
+    const arrow = i > 0 ? '<span class="dice-arrow">→</span>' : '';
+    return arrow + '<span class="dice-step">' + step + '</span>';
+  }).join('');
+
+  // 洞察
+  document.getElementById('diceInsight').textContent = result.insight;
+
+  // 备选路径
+  const altPaths = document.getElementById('altPaths');
+  const altContent = document.getElementById('altPathsContent');
+  if (result.alts && result.alts.length > 0) {
+    altPaths.style.display = 'block';
+    altContent.innerHTML = result.alts.filter(a => a.path).map(a => {
+      const aFields = Array.isArray(a.fields) ? a.fields.join('+') : (a.fields || '');
+      return `<div class="alt-path-row"><strong>${a.lens}:</strong> ${aFields || ''} → ${a.path || ''}</div>`;
+    }).join('');
+  } else {
+    altPaths.style.display = 'none';
+  }
+
+  // 正文
+  document.getElementById('essayText').innerHTML = result.essay
+    ? result.essay.split('\n').filter(l => l.trim()).map(l => `<p style="margin-bottom:0.6rem;">${l}</p>`).join('')
+    : '';
+}
+
+// ============================================================
+// === 复制 ===
+// ============================================================
+function copyToClip(text, btn) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.classList.add('copied');
+    const orig = btn.textContent;
+    btn.textContent = '✓ 已复制';
+    setTimeout(() => { btn.classList.remove('copied'); btn.textContent = orig; }, 2000);
+  });
+}
+
+function copyEssay() {
+  if (!currentResult) return;
+  const lens = THEORY_LENSES[currentResult.activeLens].name;
+  const raw = currentResult.essay.replace(/<[^>]+>/g, '');
+  const text = `${currentTopic}\n\n【理论视角：${lens}】\n${raw}\n\n骰子路径：${currentResult.chain.join(' → ')}\n\n骰评 · Economic Atlas\ntheory-dice.netlify.app/economy`;
+  copyToClip(text, document.querySelector('[onclick="copyEssay()"]'));
+}
+
+function copyShort() {
+  if (!currentResult) return;
+  const lens = THEORY_LENSES[currentResult.activeLens].name;
+  const raw = (currentResult.essay || '').replace(/<[^>]+>/g, '');
+  const first = raw.split(/[。！？\n]/)[0] + '。';
+  const text = `${currentTopic}\n\n${lens}视角：${first}\n\n${currentResult.insight}\n\n骰评 · Economic Atlas\ntheory-dice.netlify.app/economy`;
+  copyToClip(text, document.querySelector('[onclick="copyShort()"]'));
+}
+
+// === 初始化 ===
+onProviderChange();
+</script>
+<script src="economy_db.js"></script>
+</body>
+</html>
