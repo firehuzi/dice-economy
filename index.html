@@ -751,26 +751,19 @@ const API_PROVIDERS = {
 };
 
 function buildFieldPrompt(topic) {
-  return `你是经济结构分析师。分析以下现象的核心冲突张力。
+  return `分析这个经济话题的核心冲突张力和因果链。
 
-**问题：${topic}**
+话题：${topic}
 
-## 任务
-1. 识别 2-3 个核心冲突轴（Conflict Axes），每条是一个张力对，如"成本转移 vs 政策吸收"，列出 2-3 个具体机制。
-2. 从 10 个理论透镜中选择最匹配的 1 个。
-3. 生成 4-5 步因果链。
+请完成以下 3 步并以纯 JSON 输出：
 
-## 理论透镜
-institutional: 制度经济学 | world_systems: 世界体系理论 | marx: 马克思主义政治经济学
-geo_economics: 地缘经济学 | dependency: 依附理论 | neoliberal_critique: 新自由主义批判
-regulation: 调节学派 | realism: 现实主义政治经济学 | keynesian: 凯恩斯主义 | behavioral: 行为/叙事经济学
+1. 识别 2 个核心冲突轴，每条是"X vs Y"的张力对，给出 2 个具体机制。
+2. 从下列理论中选择最匹配的 1 个（只输出 key，如 "institutional"）：
+   institutional（制度经济学）| world_systems（世界体系）| marx（马克思主义）| geo_economics（地缘经济）| dependency（依附理论）| neoliberal_critique（新自由批判）| regulation（调节学派）| realism（现实主义）| keynesian（凯恩斯）| behavioral（行为经济学）
+3. 生成 4-5 步因果链，每步是一个具体机制。
 
-## 输出格式（纯 JSON，只输出 JSON，不输出其他内容）
-{
-  "conflict_axes": [{"axis":"张力A vs 张力B","mechanisms":["机制1","机制2"]}],
-  "theory_lens": "institutional",
-  "causal_chain": ["步骤1","步骤2","步骤3","步骤4"]
-}`; }
+输出格式（只输出 JSON）：
+{"conflict_axes":[{"axis":"规则主导权 vs 发展空间","mechanisms":["碳关税","补贴竞争"]}],"theory_lens":"institutional","causal_chain":["碳边境调节","出口成本上升","供应链转移","脱钩制度化"]}`; }
 
 function buildEssayPrompt(topic, axisData) {
   const lensName = (THEORY_LENSES[axisData.theory_lens] && THEORY_LENSES[axisData.theory_lens].name) || axisData.theory_lens;
@@ -828,12 +821,20 @@ async function callApiForEconomy(topic) {
 
   try {
     // === 第一轮：冲突轴 + 理论 + 因果链 ===
-    const res1 = await callApi(endpoint, apiKey, model, buildFieldPrompt(topic));
+    const res1 = await callApi(endpoint, apiKey, model, buildFieldPrompt(topic), 400);
     if (!res1.ok) return null;
     const d1 = await res1.json();
     const t1 = d1.choices?.[0]?.message?.content?.trim() || '';
     if (!t1) return null;
-    let j1 = JSON.parse(t1.replace(/^\`\`\`json\s*/, '').replace(/\s*\`\`\`$/, ''));
+    let j1;
+    try {
+      j1 = JSON.parse(t1.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim());
+    } catch(e) {
+      // AI 可能没返回纯 JSON，尝试提取
+      const m = t1.match(/\{[\s\S]*\}/);
+      if (m) j1 = JSON.parse(m[0]);
+      else return null;
+    }
     if (!j1.theory_lens || !j1.causal_chain || j1.causal_chain.length === 0) {
       console.warn('第一轮 API 不完整', j1);
       return null;
@@ -845,7 +846,13 @@ async function callApiForEconomy(topic) {
     const d2 = await res2.json();
     const t2 = d2.choices?.[0]?.message?.content?.trim() || '';
     if (!t2) { j1.insight = ''; j1.essay = ''; j1.competing_views = []; return j1; }
-    let j2 = JSON.parse(t2.replace(/^\`\`\`json\s*/, '').replace(/\s*\`\`\`$/, ''));
+    let j2;
+    try {
+      j2 = JSON.parse(t2.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim());
+    } catch(e) {
+      const m = t2.match(/\{[\s\S]*\}/);
+      j2 = m ? JSON.parse(m[0]) : {};
+    }
     j1.insight = j2.insight || '';
     j1.essay = j2.essay || '';
     j1.competing_views = j2.competing_views || [];
