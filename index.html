@@ -67,8 +67,15 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
 .essay-text { font-size: 0.85rem; line-height: 1.8; color: var(--ink); }
 
 .alt-paths { margin-top: 1rem; padding: 0.8rem; border: 1px dashed var(--border); border-radius: 8px; }
-.alt-paths-title { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
+.alt-paths-title { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; }
 .alt-path-row { font-size: 0.75rem; color: var(--grey); margin-bottom: 0.3rem; line-height: 1.5; }
+/* V2 竞争性观点并列卡片 */
+.competing-views-section { margin-top: 1rem; padding: 0.8rem; border: 1px dashed var(--border); border-radius: 8px; }
+.competing-cards { display: flex; gap: 0.6rem; }
+.competing-card { flex: 1; min-width: 0; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+.competing-card-lens { font-family: var(--sans); font-size: 0.55rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.3rem; font-weight: 600; }
+.competing-card-claim { font-size: 0.72rem; color: var(--ink); line-height: 1.5; }
+@media (max-width: 500px) { .competing-cards { flex-direction: column; } }
 
 /* === V2 冲突轴 === */
 .conflict-axes { display: flex; flex-direction: column; gap: 0.6rem; }
@@ -414,9 +421,9 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
     <div class="dice-insight" id="diceInsight"></div>
   </div>
 
-  <div class="alt-paths" id="altPaths">
-    <div class="alt-paths-title">🔀 其他可能的解释路径</div>
-    <div id="altPathsContent"></div>
+  <div class="competing-views-section" id="altPaths">
+    <div class="alt-paths-title">🔍 竞争性观点 — 同一现象，不同透镜</div>
+    <div class="competing-cards" id="altPathsContent"></div>
   </div>
 
   <div class="competing-views" id="competingViews">
@@ -761,19 +768,32 @@ function buildFieldPrompt(topic) {
 请完成以下 3 步并以纯 JSON 输出：
 
 1. 识别 2 个核心冲突轴，每条是"X vs Y"的张力对，给出 2 个具体机制。
-2. 从下列理论中选择最匹配的 1 个（只输出 key，如 "institutional"）。每个理论附带一条"翻译规则"——说明当用来分析贸易冲突/产业政策类话题时，它应该锚定在什么具体环节上，而不是停留在抽象概念上。
-   institutional（制度经济学）→ 产权界定、准入壁垒、规则制定权
-   geo_economics（地缘经济）→ 供应链重组、技术脱锚、基础设施控制
-   realist（现实主义）→ 相对收益、权力竞争、零和逻辑
-   world_systems（世界体系）→ 核心-边缘分工固化、不平等交换
-   marx（马克思主义）→ 资本积累危机、生产过剩、阶级分化
-   keynesian（凯恩斯）→ 出口需求收缩→总需求不足→财政/货币对冲
-   dependency（依附理论）→ 技术依附、产业降级、贸易条件恶化
-   regulation（调节学派）→ 积累体制断裂、制度形式重组、危机倾向
-   neoliberal_critique（新自由批判）→ 市场原教旨退潮、国家干预回归
-   behavioral（行为经济学）→ 预期反身性、恐慌叙事、风险溢价飙升
-   关键规则：选定的理论必须在后续因果链中具体化——不能停留在"金融""周期"这类抽象词上。例如选 keynesian 分析关税冲突，因果链必须从"关税推高出口成本"出发，到"财政刺激对冲需求收缩"或"货币政策宽松"收束，每一步都是一个可被新闻标题验证的机制。
+2. 从下列理论中选择最匹配的 1 个（只输出 key）。每个理论附带术语→场景映射——当用来分析贸易冲突/产业政策时，核心术语必须锚定在具体机制上。
+
+   institutional → 激励结构=碳关税的合规成本差异 | 产权界定=碳排放权分配 | 路径依赖=已投入数千亿欧元的绿色新政沉没成本 | 交易成本=碳核算+合规认证费用
+   
+   geo_economics → 战略竞争=技术标准制定权争夺 | 供应链武器化=稀土出口管制 | 技术脱钩=芯片出口限制 | 经济主权=产业自主权vs外部规则约束
+   
+   marx → 资本积累=产能过剩的利润消化机制 | 商品化=碳排放权从公共品变为可交易商品 | 剩余价值=全球价值链中的利润分配 | 阶级=碳成本从跨国资本向中小企业和消费者的转嫁
+   
+   keynesian → 总需求=出口下降引发的内需压力 | 财政干预=出口退税/补贴调整 | 流动性=汇率波动对贸易结算的影响 | 乘数效应=关税对上下游产业的传导
+   
+   world_systems → 核心-边缘=欧盟规则制定 vs 中国产业服从 | 不平等交换=碳价在不同经济体间的不等价分配 | 结构性依赖=发展中国家对核心国家技术标准的依赖
+   
+   dependency → 技术依赖=中国新能源技术对欧出口 vs 欧盟技术壁垒 | 依附性发展=出口导向经济对发达市场需求的依赖 | 贸易条件恶化=碳关税对发展中国家贸易条件的挤压
+   
+   realism → 相对收益=关税双方的损失比较 | 权力竞争=国际规则制定权 | 安全困境=技术脱钩的防御性动机引发对方升级
+   
+   neoliberal_critique → 市场原教旨=碳定价假设市场能自动调节 | 金融化=碳交易市场中的投机行为 | 治理术=碳关税作为新自由主义的合规治理工具
+   
+   regulation → 积累体制=出口导向增长模式的边界 | 调节模式=碳关税对既有调节模式的冲击 | 制度形式重组=WTO规则被碳规则替代
+   
+   behavioral → 预期反身性=碳关税宣布后企业的抢先囤货和转移 | 羊群效应=产业链转移中的跟风行为 | 叙事传播="脱钩不可避免"叙事的自我实现
+
 3. 生成 4-5 步因果链，每步是一个具体机制。
+3. 生成 4-5 步因果链，每步是一个具体机制。必须从映射表中选定的术语→场景出发，每一步都是一个可被现实事件验证的具体环节。
+   × 坏链：「金融 → 周期 → 干预 → 均衡」← 概念填空
+   √ 好链：「欧盟碳关税推高出口成本 → 比亚迪转产匈牙利规避 → 欧盟内部南欧/北欧分歧 → 中国出口退税对冲 → 脱钩制度化均衡」
 
 输出格式（只输出 JSON）：
 {"conflict_axes":[{"axis":"规则主导权 vs 发展空间","mechanisms":["碳关税","补贴竞争"]}],"theory_lens":"institutional","causal_chain":["碳边境调节","出口成本上升","供应链转移","脱钩制度化"]}`; }
@@ -801,6 +821,7 @@ ${topic}
 5. 收束：最后一句是一个短促、有力、可被独立引用的句子。可以是金句式追问（如"当关税成为唯一语言时，谁还在意贸易的真正逻辑？"），可以是指向性判断（如"冲突的未来分岔为两条路……"），但不能是"谁在定义现实？"这种万能空话。这一句要让人停下来反复咀嚼。
 6. 因果链每一步出现在正文中。
 7. 多玩家意识：不要把经济体当单一个体。涉及国家/联盟时，必须指出其内部有不同利益集团——法国的保护诉求和德国的出口依赖不在同一立场，北欧和南欧对自由贸易的态度可能相反。这不是"补充细节"，这是地缘经济框架的核心——规则制定权从来不是国家之间的简单对抗，而是内部联盟和外部压力同时作用的结果。
+8. 硬锚定：正文中必须出现至少一个带名称的政策/制度/事件（如"碳边境调节机制（CBAM）""欧盟对中国电动汽车的反补贴调查""中国的稀土出口管制""比亚迪在匈牙利建厂"）。正文不能只有抽象的经济概念而没有具体名称。
 
 ## 输出格式（纯 JSON，不输出其他内容，必须包含所有字段）
 {
@@ -1052,7 +1073,10 @@ function renderResult(result) {
     altPaths.style.display = 'block';
     altContent.innerHTML = result.competing_views.map(v => {
       const lensName = (THEORY_LENSES[v.lens] && THEORY_LENSES[v.lens].name) || v.lens;
-      return `<div class="alt-path-row"><strong>${lensName}:</strong> ${v.claim}</div>`;
+      return `<div class="competing-card">
+        <div class="competing-card-lens">${lensName}</div>
+        <div class="competing-card-claim">${v.claim}</div>
+      </div>`;
     }).join('');
   } else if (result.alts && result.alts.length > 0) {
     altPaths.style.display = 'block';
