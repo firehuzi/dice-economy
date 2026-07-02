@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>骰评 · Economic Atlas — Every Reality Holds More Than One Truth.</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root {
   --black: #1A1A1A;
@@ -28,6 +29,8 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
 .input-box:focus { border-color: var(--accent); }
 .roll-btn { width: 100%; padding: 0.8rem; font-family: var(--sans); font-size: 1rem; background: var(--black); color: #fff; border: none; border-radius: 6px; cursor: pointer; letter-spacing: 0.05em; }
 .roll-btn:hover { opacity: 0.85; }
+.file-label { font-family: var(--sans); font-size: 0.65rem; color: var(--light-grey); cursor: pointer; text-decoration: underline; }
+.file-label:hover { color: var(--accent); }
 
 .settings-toggle { font-family: var(--sans); font-size: 0.7rem; color: var(--grey); cursor: pointer; margin-top: 1.5rem; text-decoration: underline; }
 .settings-panel { display: none; margin-top: 1rem; padding: 1rem; border: 1px solid var(--border); border-radius: 6px; text-align: left; }
@@ -78,6 +81,267 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
   body { padding: 1rem; }
   .structure-grid { grid-template-columns: repeat(3, 1fr); }
 }
+
+/* === SHARE CARD === */
+.share-card-section {
+  margin-top: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.share-card-label {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--grey);
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.04em;
+}
+.share-card {
+  background: #FFF;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 1.6rem 2rem;
+  width: 420px;
+  max-width: 90vw;
+  position: relative;
+  overflow: hidden;
+}
+.share-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--black);
+}
+.share-card-brand {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--black);
+  letter-spacing: 0.08em;
+  margin-bottom: 0.1rem;
+}
+.share-card-sub {
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  color: var(--light-grey);
+  font-style: italic;
+  margin-bottom: 1rem;
+}
+.share-card-topic-label,
+.share-card-grid-label,
+.share-card-lens-label,
+.share-card-path-label,
+.share-card-insight-label,
+.share-card-excerpt-label {
+  font-family: var(--sans);
+  font-size: 0.55rem;
+  color: var(--light-grey);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid var(--border);
+}
+.share-card-topic {
+  font-family: var(--serif);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--black);
+  text-align: center;
+  margin-bottom: 0.8rem;
+}
+.share-card-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.25rem;
+  margin-bottom: 0.8rem;
+}
+.share-card-mini-cell {
+  padding: 0.3rem 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 0.55rem;
+  color: var(--light-grey);
+}
+.share-card-mini-cell.active {
+  border-color: var(--accent);
+  background: var(--highlight);
+  color: var(--black);
+  font-weight: 600;
+}
+.share-card-lens {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--black);
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  background: var(--highlight);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  margin-bottom: 0.8rem;
+}
+.share-card-path {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+.share-card-path-step {
+  padding: 0.2rem 0.45rem;
+  background: var(--black);
+  color: #fff;
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 0.6rem;
+}
+.share-card-path-arrow {
+  color: var(--light-grey);
+  font-size: 0.7rem;
+}
+.share-card-insight {
+  font-size: 0.72rem;
+  color: var(--ink);
+  font-style: italic;
+  line-height: 1.5;
+  margin-bottom: 0.8rem;
+}
+.share-card-excerpt {
+  font-size: 0.7rem;
+  color: var(--ink);
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+}
+.share-card-watermark {
+  font-family: var(--sans);
+  font-size: 0.55rem;
+  color: var(--light-grey);
+  text-align: center;
+  opacity: 0.5;
+  margin-top: 0.4rem;
+}
+.share-card-watermark a {
+  color: var(--light-grey);
+  text-decoration: none;
+}
+.share-save-btn {
+  margin-top: 0.8rem;
+  padding: 0.5rem 1.4rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  background: var(--black);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.share-save-btn:hover { opacity: 0.85; }
+
+/* === HISTORY MODAL === */
+.history-btn-wrap { display: flex; justify-content: center; margin-top: 0.5rem; }
+.history-btn {
+  padding: 0.5rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--grey);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.history-btn:hover { border-color: var(--accent); }
+.history-overlay {
+  display: none;
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.history-overlay.open { display: flex; }
+.history-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 1.5rem;
+  width: 440px;
+  max-width: 92vw;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+.history-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.history-panel-title {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--black);
+}
+.history-panel-close {
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--grey);
+  cursor: pointer;
+  text-decoration: underline;
+}
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+.history-item {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.history-item:hover { border-color: var(--accent); background: var(--highlight); }
+.history-item-topic {
+  font-family: var(--serif);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--black);
+}
+.history-item-meta {
+  font-family: var(--sans);
+  font-size: 0.6rem;
+  color: var(--light-grey);
+  margin-top: 0.2rem;
+}
+.history-empty {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--light-grey);
+  text-align: center;
+  padding: 2rem 0;
+}
+.history-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.history-clear-btn {
+  padding: 0.4rem 1rem;
+  font-family: var(--sans);
+  font-size: 0.7rem;
+  color: var(--grey);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  cursor: pointer;
+}
+.history-clear-btn:hover { border-color: var(--accent); color: var(--black); }
 </style>
 </head>
 <body>
@@ -86,6 +350,11 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
   <div class="brand">骰评 · Economic Atlas</div>
   <div class="brand-sub">Every Reality Holds More Than One Truth.</div>
   <input type="text" class="input-box" id="topicInput" placeholder="输入一个经济问题或现象，例如：房价为什么持续上涨？">
+  <div class="file-area" style="text-align:right;margin-bottom:0.8rem;">
+    <label class="file-label" for="fileInput">📄 上传文本文件（复杂问题可先写再传）</label>
+    <input type="file" id="fileInput" accept=".txt,.md" style="display:none" onchange="handleFileUpload(this)">
+    <span id="fileStatus" style="font-family:var(--sans);font-size:0.65rem;color:var(--grey);display:none;"></span>
+  </div>
   <button class="roll-btn" onclick="startAnalysis()">🎲 生成骰评</button>
   <div class="settings-toggle" onclick="toggleSettings()">⚙ 引擎与模型设置</div>
   <div class="settings-panel" id="settingsPanel">
@@ -131,7 +400,48 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
     <button class="action-btn" onclick="copyEssay()">复制全文</button>
     <button class="action-btn" onclick="copyShort()">复制摘要</button>
   </div>
+
+  <div class="share-card-section">
+    <div class="share-card-label">分享卡片</div>
+    <div class="share-card" id="shareCard">
+      <div class="share-card-brand">骰评 · Economic Atlas</div>
+      <div class="share-card-sub">Every Reality Holds More Than One Truth.</div>
+      <div class="share-card-topic-label">主题</div>
+      <div class="share-card-topic" id="shareCardTopic"></div>
+      <div class="share-card-grid-label">结构场</div>
+      <div class="share-card-mini-grid" id="shareCardGrid"></div>
+      <div class="share-card-lens-label">理论视角</div>
+      <div class="share-card-lens" id="shareCardLens"></div>
+      <div class="share-card-path-label">骰子路径</div>
+      <div class="share-card-path" id="shareCardPath"></div>
+      <div class="share-card-insight-label">洞察</div>
+      <div class="share-card-insight" id="shareCardInsight"></div>
+      <div class="share-card-excerpt-label">评论摘要</div>
+      <div class="share-card-excerpt" id="shareCardExcerpt"></div>
+      <div class="share-card-watermark">🎲 骰评 · Economic Atlas · theory-dice.netlify.app/economy</div>
+    </div>
+    <button class="share-save-btn" onclick="saveShareCard()">保存卡片</button>
+  </div>
+
+  <div class="history-btn-wrap">
+    <button class="history-btn" onclick="showHistory()">📋 历史记录</button>
+  </div>
+
   <div class="engine-badge" id="engineBadge"></div>
+</div>
+
+<!-- History Modal -->
+<div class="history-overlay" id="historyOverlay" onclick="if(event.target===this) hideHistory()">
+  <div class="history-panel">
+    <div class="history-panel-header">
+      <span class="history-panel-title">历史记录</span>
+      <span class="history-panel-close" onclick="hideHistory()">关闭</span>
+    </div>
+    <div class="history-list" id="historyList"></div>
+    <div class="history-panel-footer">
+      <button class="history-clear-btn" onclick="clearHistory()">清空历史</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -210,7 +520,24 @@ function onProviderChange() {
 function goHome() {
   document.getElementById('resultScreen').classList.remove('active');
   document.getElementById('homeScreen').classList.remove('hidden');
+  document.getElementById('topicInput').value = '';
   document.getElementById('topicInput').focus();
+}
+
+// === 文件上传 ===
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const text = e.target.result.trim();
+    if (text) {
+      document.getElementById('topicInput').value = text;
+      document.getElementById('fileStatus').textContent = '✓ ' + file.name;
+      document.getElementById('fileStatus').style.display = 'inline';
+    }
+  };
+  reader.readAsText(file);
 }
 
 // ============================================================
@@ -383,36 +710,75 @@ const API_PROVIDERS = {
   custom: { endpoint: '' }
 };
 
-function buildApiPrompt(topic) {
-  return `你是骰评·经济版的引擎。分析以下经济问题：
+function buildApiPrompt(topic) { return `你是骰评·Economic Atlas 的经济分析引擎。以制度经济学的结构性视角分析以下经济现象。
 
 **问题：${topic}**
 
-## 任务
-第一步：判断 9 大结构场中哪些对这个现象最关键（输出 key 列表）
+## 任务（4 步）
+
+第一步：判断 9 大结构场中哪些对这个现象最关键（输出 2-3 个 key）
 第二步：从 5 个理论框架中选择最匹配的 1 个
-第三步：生成一条因果链（3-4步，用 → 连接）
-第四步：写一篇 300-500 字的结构化经济评论
+第三步：生成一条因果链（4-5步，用 → 连接，每一步是一个具体的机制/制度/行为）
+第四步：写一篇 300-500 字的分析
+
+## 结构场（9 格）
+production: 生产（劳动·技术·资本·效率）
+distribution: 分配（收入·财富·税收）
+demand: 需求（消费·投资·政府·外需）
+pricing: 价格（市场价·资产价·信用价）
+finance: 金融（利率·杠杆·信贷·泡沫）
+institution: 制度（政策·法规·国家能力）
+narrative: 叙事（信心·预期·故事）
+cycle: 周期（扩张·过热·衰退·重构）
+external: 外部（贸易·汇率·地缘·冲击）
 
 ## 理论框架
-- marx: 马克思主义（阶级、剩余价值、资本积累、商品化）
-- neoclassical: 新古典/新自由主义（市场效率、理性选择、均衡、价格信号）
-- keynesian: 凯恩斯主义（总需求、流动性、政府干预、经济波动）
-- institutional: 制度经济学（激励结构、产权、路径依赖、交易成本）
-- behavioral: 行为/叙事经济学（预期、心理、羊群效应、叙事传播）
+- marx: 马克思主义（阶级·剩余价值·资本积累·商品化）
+- neoclassical: 新古典/新自由主义（市场效率·理性选择·均衡·价格信号）
+- keynesian: 凯恩斯主义（总需求·流动性·政府干预·经济波动）
+- institutional: 制度经济学（激励结构·产权·路径依赖·交易成本）
+- behavioral: 行为/叙事经济学（预期·心理·羊群效应·叙事传播）
 
-## 输出格式（纯 JSON）
+## 写作规则
+
+必须遵守以下 6 条：
+
+1. 机制锚定（不是理论介绍）
+   第一句必须是一个不可替换的具体机制/制度/事件。把"${topic}"换成另一个话题，这句话就说不通。
+   坏：「价格信号和激励机制决定了市场行为」← 任何话题都能这么说
+   好：「欧盟碳边境调节机制通过碳排放权定价将气候成本嵌入贸易规则」← 只对特定话题成立
+
+2. 每句最多一个抽象概念
+   提出一个理论词（路径依赖、激励结构、交易成本），立刻用下一个句子举出一个具体机制来解释它。
+   坏：「双方激励结构高度不对称」→ 然后不解释。好：「双方激励结构高度不对称——欧盟已投入数千亿欧元推进绿色新政，若放弃CBAM将面临制度沉没成本与政治信誉损失。」
+
+3. 概念从现象中推导（理论后置）
+   先描述具体机制/事件，再用理论词给它命名。不要先抛理论再找例子。
+   坏：「从制度经济学视角看，路径依赖解释了...」
+   好：「欧盟已投入数千亿欧元推进绿色新政，若放弃CBAM将面临制度沉没成本——这种路径依赖使得短期退出的成本高于继续冲突。」
+
+4. 一个反观点（不是"两者不矛盾"和解）
+   在论证主干之后，提出一个认真对待的反面论证——不是"两种理论都成立"，而是一个真正可能推翻主干的观察。
+   坏：「凯恩斯主义和制度经济学并不冲突，它们描述了同一结构的不同层面。」
+   好：「但存在一个反例：如果中国制造业足够强，以至于碳价成本被规模效应吸收，CBAM的壁垒作用将大幅下降——冲突的根源可能不在制度，而在技术效率。」
+
+5. 收束用判断，不用提问
+   不要用「真正的问题是……？」结束。给出一个有明确视角的判断，即使这个判断是"路径未确定"——也要说是哪两条路径在竞争。
+   坏：「真正的问题是谁来定义现实？」
+   好：「冲突的未来分岔为两条路：如果碳捕集技术突破，CBAM的成本约束将瓦解，冲突降级为技术竞争；如果WTO改革失败，碳关税将固化为主权工具，经济脱钩从风险变为结构。」
+
+6. 因果链的每一步都要出现在正文中
+   你生成的 causal_chain 中每一个节点必须是对正文中实际提到的一个机制的压缩命名。不能生造因果链然后正文里不出现。
+
+## 输出格式（纯 JSON，只输出 JSON）
 {
-  "structure_fields": ["finance","demand"],
-  "theory_lens": "marx",
-  "causal_chain": ["信贷扩张","资产化住房","阶级固化","居住权商品化"],
+  "structure_fields": ["institution","external"],
+  "theory_lens": "institutional",
+  "causal_chain": ["碳边境调节","出口成本上升","供应链转移","贸易脱钩制度化"],
   "insight": "一句话洞察",
-  "essay": "300-500字评论",
-  "alt_paths": [
-    {"lens":"keynesian","path":"流动性过剩 → 资产通胀 → 财富再分配"}
-  ]
-}`;
-}
+  "essay": "300-500字分析（6条规则全部适用）",
+  "alt_paths": [{"lens":"keynesian","path":"流动性过剩 ~ 资产通胀 ~ 财富再分配"}]
+}`; }
 
 async function callApiForEconomy(topic) {
   const apiKey = document.getElementById('apiKey').value.trim();
@@ -568,6 +934,12 @@ function renderResult(result) {
   document.getElementById('essayText').innerHTML = result.essay
     ? result.essay.split('\n').filter(l => l.trim()).map(l => `<p style="margin-bottom:0.6rem;">${l}</p>`).join('')
     : '';
+
+  // 渲染分享卡片
+  renderShareCard(result);
+
+  // 保存到历史记录
+  saveToHistory(currentTopic, result);
 }
 
 // ============================================================
@@ -597,6 +969,179 @@ function copyShort() {
   const first = raw.split(/[。！？\n]/)[0] + '。';
   const text = `${currentTopic}\n\n${lens}视角：${first}\n\n${currentResult.insight}\n\n骰评 · Economic Atlas\ntheory-dice.netlify.app/economy`;
   copyToClip(text, document.querySelector('[onclick="copyShort()"]'));
+}
+
+// ============================================================
+// === 分享卡片 ===
+// ============================================================
+function renderShareCard(result) {
+  document.getElementById('shareCardTopic').textContent = currentTopic;
+
+  // 结构场迷你网格
+  const grid = document.getElementById('shareCardGrid');
+  grid.innerHTML = Object.entries(STRUCTURE_FIELDS).map(([k, v]) => {
+    const active = result.activeFields.includes(k) ? ' active' : '';
+    return `<div class="share-card-mini-cell${active}">${v.label}</div>`;
+  }).join('');
+
+  // 理论视角
+  document.getElementById('shareCardLens').textContent = THEORY_LENSES[result.activeLens].name;
+
+  // 骰子路径
+  const path = document.getElementById('shareCardPath');
+  path.innerHTML = result.chain.map((step, i) => {
+    const arrow = i > 0 ? '<span class="share-card-path-arrow">→</span>' : '';
+    return arrow + '<span class="share-card-path-step">' + step + '</span>';
+  }).join('');
+
+  // 洞察
+  document.getElementById('shareCardInsight').textContent = result.insight || '';
+
+  // 短文摘要（取前两句话或前120字）
+  const raw = (result.essay || '').replace(/<[^>]+>/g, '');
+  const sentences = raw.split(/[。！？\n]/).filter(s => s.trim());
+  const excerpt = sentences.slice(0, 2).map(s => s.trim()).join('。') + '。';
+  document.getElementById('shareCardExcerpt').textContent = excerpt;
+}
+
+function saveShareCard() {
+  const card = document.getElementById('shareCard');
+  showToast && showToast('正在生成卡片图片...');
+
+  html2canvas(card, {
+    scale: 2,
+    backgroundColor: '#FFFFFF',
+    useCORS: true,
+    logging: false,
+    onclone: function(clonedDoc) {
+      const clonedCard = clonedDoc.getElementById('shareCard');
+      if (clonedCard) clonedCard.style.boxShadow = 'none';
+    }
+  }).then(function(canvas) {
+    const link = document.createElement('a');
+    const safeName = currentTopic.replace(/[<>:"/\\|?*]/g, '').substring(0, 30);
+    link.download = '骰评-' + safeName + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    showToast && showToast('卡片已保存为 PNG 图片');
+  }).catch(function(err) {
+    console.error('html2canvas error:', err);
+    showToast && showToast('图片生成失败，请尝试截图');
+  });
+}
+
+// Toast helper
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);padding:0.6rem 1.4rem;background:var(--black);color:#fff;border-radius:6px;font-family:var(--sans);font-size:0.75rem;z-index:2000;opacity:0;transition:opacity 0.3s;pointer-events:none;';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.style.opacity = '0'; }, 2000);
+}
+
+// ============================================================
+// === 历史记录 ===
+// ============================================================
+const HISTORY_KEY = 'dice_economy_history';
+const HISTORY_MAX = 50;
+
+function saveToHistory(topic, result) {
+  try {
+    let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    const entry = {
+      topic: topic,
+      activeFields: result.activeFields,
+      activeLens: result.activeLens,
+      chain: result.chain,
+      insight: result.insight,
+      essay: result.essay,
+      alts: result.alts,
+      isApi: result.isApi || false,
+      match: result.match ? {
+        economy: result.match.economy,
+        period: result.match.period,
+        focus: result.match.focus
+      } : null,
+      timestamp: Date.now()
+    };
+    // 去重：相同 topic 只保留最新的
+    history = history.filter(h => h.topic !== topic);
+    history.unshift(entry);
+    if (history.length > HISTORY_MAX) history = history.slice(0, HISTORY_MAX);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  } catch(e) { console.error('保存历史失败:', e); }
+}
+
+function showHistory() {
+  renderHistoryList();
+  document.getElementById('historyOverlay').classList.add('open');
+}
+
+function hideHistory() {
+  document.getElementById('historyOverlay').classList.remove('open');
+}
+
+function renderHistoryList() {
+  const list = document.getElementById('historyList');
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (history.length === 0) {
+      list.innerHTML = '<div class="history-empty">暂无历史记录</div>';
+      return;
+    }
+    list.innerHTML = history.map((h, i) => {
+      const lensName = THEORY_LENSES[h.activeLens] ? THEORY_LENSES[h.activeLens].name : h.activeLens;
+      const date = new Date(h.timestamp);
+      const dateStr = date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0') + ' ' +
+        String(date.getHours()).padStart(2, '0') + ':' +
+        String(date.getMinutes()).padStart(2, '0');
+      return `<div class="history-item" onclick="loadFromHistory(${i})">
+        <div class="history-item-topic">${h.topic}</div>
+        <div class="history-item-meta">${lensName} · ${dateStr}</div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="history-empty">历史记录加载失败</div>';
+  }
+}
+
+function loadFromHistory(index) {
+  try {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (index < 0 || index >= history.length) return;
+    const h = history[index];
+    currentTopic = h.topic;
+    currentResult = {
+      activeFields: h.activeFields,
+      activeLens: h.activeLens,
+      chain: h.chain,
+      insight: h.insight,
+      essay: h.essay,
+      alts: h.alts,
+      isApi: h.isApi,
+      match: h.match
+    };
+    hideHistory();
+    document.getElementById('resultTopic').textContent = currentTopic;
+    document.getElementById('homeScreen').classList.add('hidden');
+    document.getElementById('resultScreen').classList.add('active');
+    document.getElementById('engineBadge').textContent = h.isApi ? 'AI 引擎' : '模板引擎';
+    renderResult(currentResult);
+  } catch(e) { console.error('加载历史失败:', e); }
+}
+
+function clearHistory() {
+  if (!confirm('确定要清空所有历史记录吗？')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistoryList();
 }
 
 // === 初始化 ===
