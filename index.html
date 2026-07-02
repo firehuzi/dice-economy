@@ -234,9 +234,41 @@ function weightedPick(items, weights, count) {
   return result;
 }
 
+// 关键词启发式（无数据库匹配时的 fallback）
+function heuristicWeights(topic) {
+  const t = topic.toLowerCase();
+  // 结构场启发
+  const sw = {};
+  if (/关税|贸易战|制裁|脱钩|出口|进口|全球化|断链/.test(t)) { sw.external = 85; sw.institution = 80; }
+  if (/泡沫|信贷|杠杆|违约|银行|利率|金融|次贷|投行/.test(t)) { sw.finance = 90; sw.cycle = 75; }
+  if (/房价|住房|楼市|土地|城镇化/.test(t)) { sw.institution = 85; sw.pricing = 80; sw.distribution = 70; }
+  if (/就业|工资|裁员|收入|消费|购买力/.test(t)) { sw.demand = 80; sw.production = 75; sw.distribution = 75; }
+  if (/生产|制造|工业|产业链|供应链|工厂/.test(t)) { sw.production = 85; sw.external = 70; }
+  if (/通胀|物价|CPI|涨价|货币|印钞/.test(t)) { sw.pricing = 90; sw.cycle = 70; sw.narrative = 75; }
+  if (/技术|AI|人工智能|科技|芯片|互联网|数字化/.test(t)) { sw.production = 85; sw.narrative = 80; sw.external = 70; }
+  if (/政策|改革|体制|国家|政府|监管|法规/.test(t)) { sw.institution = 90; }
+  if (/衰退|萧条|危机|崩溃|崩盘/.test(t)) { sw.cycle = 90; sw.finance = 80; sw.narrative = 80; }
+  if (/信心|预期|情绪|恐慌|乐观|叙事/.test(t)) { sw.narrative = 90; sw.cycle = 65; }
+
+  // 理论启发
+  const tf = {};
+  if (/阶级|剥削|剩余|商品化|资本|劳工|工人/.test(t)) tf.marx = 5;
+  else if (/效率|市场|自由|理性|均衡|激励/.test(t)) tf.neoclassical = 5;
+  else if (/需求|刺激|财政|干预|乘数|政府支出/.test(t)) tf.keynesian = 5;
+  else if (/制度|规则|国家|产权|路径依赖|法规/.test(t)) tf.institutional = 5;
+  else if (/情绪|心理|羊群|FOMO|恐慌|叙事|预期/.test(t)) tf.behavioral = 5;
+  else tf.behavioral = 4;
+
+  return { structure_weights: sw, theory_fit: tf };
+}
+
 function rollDice(match) {
   const fieldKeys = Object.keys(STRUCTURE_FIELDS);
   const lensKeys = Object.keys(THEORY_LENSES);
+
+  // 无数据库匹配 → 启发式 fallback
+  if (!match) match = heuristicWeights(currentTopic);
+
   const sw = match && match.structure_weights ? match.structure_weights : {};
   const tf = match && match.theory_fit ? match.theory_fit : {};
 
