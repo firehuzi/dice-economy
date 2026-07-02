@@ -761,8 +761,18 @@ function buildFieldPrompt(topic) {
 请完成以下 3 步并以纯 JSON 输出：
 
 1. 识别 2 个核心冲突轴，每条是"X vs Y"的张力对，给出 2 个具体机制。
-2. 从下列理论中选择最匹配的 1 个（只输出 key，如 "institutional"）：
-   institutional（制度经济学）| world_systems（世界体系）| marx（马克思主义）| geo_economics（地缘经济）| dependency（依附理论）| neoliberal_critique（新自由批判）| regulation（调节学派）| realism（现实主义）| keynesian（凯恩斯）| behavioral（行为经济学）
+2. 从下列理论中选择最匹配的 1 个（只输出 key，如 "institutional"）。每个理论附带一条"翻译规则"——说明当用来分析贸易冲突/产业政策类话题时，它应该锚定在什么具体环节上，而不是停留在抽象概念上。
+   institutional（制度经济学）→ 产权界定、准入壁垒、规则制定权
+   geo_economics（地缘经济）→ 供应链重组、技术脱锚、基础设施控制
+   realist（现实主义）→ 相对收益、权力竞争、零和逻辑
+   world_systems（世界体系）→ 核心-边缘分工固化、不平等交换
+   marx（马克思主义）→ 资本积累危机、生产过剩、阶级分化
+   keynesian（凯恩斯）→ 出口需求收缩→总需求不足→财政/货币对冲
+   dependency（依附理论）→ 技术依附、产业降级、贸易条件恶化
+   regulation（调节学派）→ 积累体制断裂、制度形式重组、危机倾向
+   neoliberal_critique（新自由批判）→ 市场原教旨退潮、国家干预回归
+   behavioral（行为经济学）→ 预期反身性、恐慌叙事、风险溢价飙升
+   关键规则：选定的理论必须在后续因果链中具体化——不能停留在"金融""周期"这类抽象词上。例如选 keynesian 分析关税冲突，因果链必须从"关税推高出口成本"出发，到"财政刺激对冲需求收缩"或"货币政策宽松"收束，每一步都是一个可被新闻标题验证的机制。
 3. 生成 4-5 步因果链，每步是一个具体机制。
 
 输出格式（只输出 JSON）：
@@ -783,9 +793,9 @@ ${topic}
 因果链：${chain}
 理论透镜：${lensName}
 
-## 写作规则（6 条）
+## 写作规则（8 条）
 1. 机制锚定：第一句必须是一个不可替换的具体机制/制度/事件。
-2. 每句最多一个抽象概念：提出理论词后紧跟具体机制解释。
+2. 翻译强制：因果链每一步必须翻译为正文中一个具体、可验证的机制（如"比亚迪匈牙利工厂""越南产能转移""碳关税推高合规成本12%"）。禁止使用"金融""周期""流动性"等概念词作为分析步骤——它们必须通过一个具体事件被锚定。反例："金融作用于分配 → 经济波动作用于定价 → 政府干预作用于制度"← 这是概念填空。正例："碳关税推高出口成本 → 比亚迪转产匈牙利 → 欧盟内部南北分歧加剧 → 财政补贴竞赛 → 中欧贸易脱钩制度化"← 每一步都可被新闻标题验证。
 3. 理论后置：先描述机制/事件，再用理论词命名。
 4. 一个反观点：认真对待一个可能推翻主干的观察，不用"两种理论都成立"的和解句式。
 5. 收束：最后一句是一个短促、有力、可被独立引用的句子。可以是金句式追问（如"当关税成为唯一语言时，谁还在意贸易的真正逻辑？"），可以是指向性判断（如"冲突的未来分岔为两条路……"），但不能是"谁在定义现实？"这种万能空话。这一句要让人停下来反复咀嚼。
@@ -795,7 +805,7 @@ ${topic}
 ## 输出格式（纯 JSON，不输出其他内容，必须包含所有字段）
 {
   "insight": "一句话洞察（20-40字）",
-  "essay": "300-500字分析（6条规则全部适用）",
+  "essay": "300-500字分析（8条规则全部适用）",
   "competing_views": [
     {"lens":"world_systems","claim":"用另一个理论视角解释同一现象（20-40字）"},
     {"lens":"marx","claim":"用第三个理论视角解释同一现象（20-40字）"}
@@ -936,9 +946,31 @@ async function startAnalysis() {
   renderResult(result);
 }
 
-function reroll() {
+async function reroll() {
   if (!currentTopic) return;
-  const match = matchEconomyEntry(currentTopic);
+  engineMode = document.getElementById('engineMode').value;
+
+  let result;
+  if (engineMode === 'api') {
+    const apiResult = await callApiForEconomy(currentTopic);
+    if (apiResult && apiResult.theory_lens) {
+      result = {
+        activeFields: apiResult.structure_fields || ['finance', 'demand'],
+        activeLens: apiResult.theory_lens,
+        chain: apiResult.causal_chain || [],
+        insight: apiResult.insight || '',
+        essay: apiResult.essay || '',
+        alts: apiResult.alt_paths || [],
+        conflict_axes: apiResult.conflict_axes || [],
+        competing_views: apiResult.competing_views || [],
+        isApi: true
+      };
+    }
+  }
+
+  if (!result) {
+    if (engineMode === 'api') showToast('AI 返回不完整，已切换为模板引擎');
+    const match = matchEconomyEntry(currentTopic);
     const dice = rollDice(match);
     const essay = generateEssay(currentTopic, dice);
     const conflict_axes = (match && match.key_conflicts && match.key_conflicts.length > 0)
@@ -947,7 +979,7 @@ function reroll() {
           mechanisms: match.key_actors ? match.key_actors.slice(i * 2, i * 2 + 2) : []
         }))
       : [];
-    const result = {
+    result = {
       activeFields: dice.activeFields,
       activeLens: dice.activeLens,
       chain: dice.chain,
@@ -959,6 +991,8 @@ function reroll() {
       conflict_axes: conflict_axes,
       competing_views: []
     };
+  }
+
   currentResult = result;
   renderResult(result);
 }
