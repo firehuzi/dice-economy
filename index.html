@@ -787,19 +787,22 @@ ${topic}
 1. 机制锚定：第一句必须是一个不可替换的具体机制/制度/事件。
 2. 每句最多一个抽象概念：提出理论词后紧跟具体机制解释。
 3. 理论后置：先描述机制/事件，再用理论词命名。
-4. 一个反观点：认真对待一个可能推翻主干的观察，不用"两种理论都成立"。
-5. 收束用判断：给出有明确视角的判断，不用提问。
+4. 一个反观点：认真对待一个可能推翻主干的观察，不用"两种理论都成立"的和解句式。
+5. 收束：最后一句是一个短促、有力、可被独立引用的句子。可以是金句式追问（如"当关税成为唯一语言时，谁还在意贸易的真正逻辑？"），可以是指向性判断（如"冲突的未来分岔为两条路……"），但不能是"谁在定义现实？"这种万能空话。这一句要让人停下来反复咀嚼。
 6. 因果链每一步出现在正文中。
+7. 多玩家意识：不要把经济体当单一个体。涉及国家/联盟时，必须指出其内部有不同利益集团——法国的保护诉求和德国的出口依赖不在同一立场，北欧和南欧对自由贸易的态度可能相反。这不是"补充细节"，这是地缘经济框架的核心——规则制定权从来不是国家之间的简单对抗，而是内部联盟和外部压力同时作用的结果。
 
-## 输出格式（纯 JSON，不输出其他内容）
+## 输出格式（纯 JSON，不输出其他内容，必须包含所有字段）
 {
   "insight": "一句话洞察（20-40字）",
-  "essay": "300-500字分析",
+  "essay": "300-500字分析（6条规则全部适用）",
   "competing_views": [
-    {"lens":"world_systems","claim":"用另一个理论视角解释同一现象"},
-    {"lens":"marx","claim":"用第三个理论视角解释同一现象"}
+    {"lens":"world_systems","claim":"用另一个理论视角解释同一现象（20-40字）"},
+    {"lens":"marx","claim":"用第三个理论视角解释同一现象（20-40字）"}
   ]
-}`; }
+}
+
+注意：competing_views 必须包含 2 条，每条有 lens 和 claim。lens 必须是理论透镜 key（如 world_systems, marx, dependency 等），claim 是另一套完整的解释视角。`; }
 
 function callApi(endpoint, apiKey, model, prompt, maxTok) {
   return fetch(endpoint, {
@@ -859,6 +862,15 @@ async function callApiForEconomy(topic) {
     j1.insight = j2.insight || '';
     j1.essay = j2.essay || '';
     j1.competing_views = j2.competing_views || [];
+
+    // 兜底：AI 可能漏掉 competing_views，用其他理论临时生成
+    if (j1.competing_views.length === 0) {
+      const altLenses = Object.keys(THEORY_LENSES).filter(k => k !== j1.theory_lens);
+      j1.competing_views = altLenses.slice(0, 2).map(k => ({
+        lens: k,
+        claim: THEORY_LENSES[k].name + '视角：' + (j1.causal_chain[0] || topic) + '的根源在于' + THEORY_LENSES[k].terms.slice(0,2).join('与') + '的结构性互动。'
+      }));
+    }
 
     // 最终校验
     if (!j1.essay || j1.essay.length < 80) {
