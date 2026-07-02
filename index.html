@@ -70,6 +70,31 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
 .alt-paths-title { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.4rem; }
 .alt-path-row { font-size: 0.75rem; color: var(--grey); margin-bottom: 0.3rem; line-height: 1.5; }
 
+/* === V2 冲突轴 === */
+.conflict-axes { display: flex; flex-direction: column; gap: 0.6rem; }
+.conflict-axis { padding: 0.7rem 0.8rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+.conflict-axis-title { font-family: var(--serif); font-size: 0.85rem; font-weight: 700; color: var(--black); margin-bottom: 0.4rem; }
+.conflict-axis .axis-vs { color: var(--accent); font-weight: 400; font-size: 0.7rem; margin: 0 0.2rem; }
+.mechanism-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+.mechanism-tag { padding: 0.15rem 0.4rem; background: var(--highlight); border: 1px solid var(--border); border-radius: 3px; font-family: var(--sans); font-size: 0.58rem; color: var(--grey); }
+.mechanism-tags { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+.mechanism-tag { padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 3px; font-family: var(--sans); font-size: 0.6rem; color: var(--grey); background: var(--highlight); }
+
+/* === V2 竞争性观点 === */
+.competing-views { margin-top: 1rem; padding: 0.8rem; border: 1px dashed var(--border); border-radius: 8px; }
+.competing-views-title { font-family: var(--sans); font-size: 0.6rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.5rem; }
+.competing-view-item { font-size: 0.75rem; color: var(--ink); margin-bottom: 0.4rem; line-height: 1.5; border-left: 2px solid var(--border); padding-left: 0.6rem; }
+.competing-view-item .cv-lens { font-family: var(--sans); font-size: 0.65rem; color: var(--accent); font-weight: 600; display: inline-block; margin-right: 0.4rem; }
+
+/* === V2 share card conflict axes === */
+.share-card-conflict-label { font-family: var(--sans); font-size: 0.55rem; color: var(--light-grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; padding-bottom: 0.2rem; border-bottom: 1px solid var(--border); }
+.share-card-conflict { font-size: 0.65rem; color: var(--black); margin-bottom: 0.6rem; line-height: 1.4; }
+.share-card-conflict .sc-axis-name { font-weight: 600; }
+.share-card-conflict .sc-axis-mech { color: var(--grey); font-size: 0.58rem; }
+.share-card-competing-label { font-family: var(--sans); font-size: 0.55rem; color: var(--light-grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; padding-bottom: 0.2rem; border-bottom: 1px solid var(--border); }
+.share-card-competing { font-size: 0.6rem; color: var(--ink); margin-bottom: 0.6rem; line-height: 1.4; }
+.share-card-competing .sc-comp-lens { font-weight: 600; color: var(--accent); }
+
 .action-bar { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
 .action-btn { padding: 0.5rem 1rem; font-family: var(--sans); font-size: 0.75rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg); cursor: pointer; }
 .action-btn:hover { border-color: var(--accent); }
@@ -374,10 +399,10 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
   <div class="essay-topic" id="resultTopic"></div>
   <div class="match-info" id="resultMatch" style="display:none;font-family:var(--sans);font-size:0.65rem;color:var(--grey);margin-top:-0.5rem;margin-bottom:0.8rem;padding-left:0.2rem;border-left:2px solid var(--accent);"></div>
 
-  <div class="section-label">🧱 结构场（9格经济分解）</div>
-  <div class="structure-grid" id="structureGrid"></div>
+  <div class="section-label">⚡ 冲突轴（Conflict Axes）</div>
+  <div class="conflict-axes" id="conflictAxes"></div>
 
-  <div class="section-label">🧠 理论视角</div>
+  <div class="section-label">🧠 理论视角（10个透镜）</div>
   <div class="theory-bar" id="theoryBar"></div>
 
   <div class="dice-path">
@@ -389,6 +414,11 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
   <div class="alt-paths" id="altPaths">
     <div class="alt-paths-title">🔀 其他可能的解释路径</div>
     <div id="altPathsContent"></div>
+  </div>
+
+  <div class="competing-views" id="competingViews">
+    <div class="competing-views-title">🔍 竞争性观点（其他理论视角的解释）</div>
+    <div id="competingViewsContent"></div>
   </div>
 
   <div class="essay-section">
@@ -446,9 +476,9 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
 
 <script>
 // ============================================================
-// === 9 大经济结构场 ===
+// === 9 大经济结构场（V2：降级为参考，主显示为冲突轴）===
 // ============================================================
-const STRUCTURE_FIELDS = {
+const STRUCTURE_REF = {
   production:   { label:'生产', detail:'劳动·技术·资本·效率', desc:'谁生产、如何生产、生产效率的变化' },
   distribution: { label:'分配', detail:'收入·财富·税收', desc:'财富和收入在群体之间的分布' },
   demand:       { label:'需求', detail:'消费·投资·政府·外需', desc:'谁在消费、投资和支出的结构' },
@@ -461,33 +491,58 @@ const STRUCTURE_FIELDS = {
 };
 
 // ============================================================
-// === 5 大理论框架 ===
+// === 10 大理论框架 (V2) ===
 // ============================================================
 const THEORY_LENSES = {
-  marx: {
-    name: '马克思主义',
-    terms: ['阶级','剩余价值','资本积累','商品化','生产关系','剥削','异化'],
-    template: (topic, fields) => `在马克思主义视角下，${topic}本质上是资本逻辑在${fields}领域的展开。剩余价值的吸收机制、资本积累的内在驱动、以及阶级关系的再生产，共同塑造了${topic}的深层动力。这不是市场失灵的问题，而是资本运行的内在必然。`
+  institutional: {
+    name: '制度经济学',
+    terms: ['激励结构','产权','交易成本','路径依赖','制度锁定','正式/非正式规则'],
+    template: (topic, axis) => `从制度经济学看，${topic}的冲突根源于${axis}层面的激励设计和规则约束。各方在不同制度框架下形成的路径依赖和交易成本结构，使得${topic}不是纯粹的效率竞争，而是制度体系之间的碰撞。当前僵局的本质是两套规则体系在${axis}维度上无法兼容——任何一方的调整都意味着高昂的制度沉没成本，而维持现状同样在积累长期摩擦。改变冲突的走向，不在于说服对方，而在于能否创造出降低转换成本的制度接口。`
   },
-  neoclassical: {
-    name: '新古典/新自由主义',
-    terms: ['市场效率','理性选择','均衡','价格信号','激励','边际分析'],
-    template: (topic, fields) => `从新古典经济学出发，${topic}可以被理解为市场参与者在${fields}领域内理性选择的宏观聚合。价格信号、激励机制和资源配置效率共同决定了${topic}的演变。问题不在于系统本身，而在于是否存在阻碍市场机制运行的扭曲。`
+  marx: {
+    name: '马克思主义政治经济学',
+    terms: ['剩余价值','资本积累','商品化','阶级关系','生产关系','剥削'],
+    template: (topic, axis) => `马克思主义政治经济学的视角揭示：${topic}的表层摩擦之下，是${axis}领域的资本积累逻辑在驱动。剩余价值的吸收需要一个持续的扩张机制，而${topic}正是这一机制遭遇边界时的表现——不是偶然冲突，而是资本逻辑内在的扩张性与有限空间的矛盾。当生产关系无法容纳新的生产力时，冲突就从经济层面外溢为制度层面的对抗。`
+  },
+  world_systems: {
+    name: '世界体系理论',
+    terms: ['核心-边缘','结构依赖','不平等交换','商品链','霸权周期','半边缘'],
+    template: (topic, axis) => `世界体系理论将${topic}置于全球资本主义的历史结构中考察。${axis}层面的冲突不是两个平等主体的博弈，而是核心国家通过制度安排维持边缘国家依附地位的延续。不平等交换机制嵌入在贸易规则、技术标准和金融体系中，使得${topic}成为中心-边缘结构再生产的一个节点——边缘国家的升级努力遭遇核心国家的规则阻拦，这不是意外，而是体系的内在逻辑。`
+  },
+  geo_economics: {
+    name: '地缘经济学',
+    terms: ['战略竞争','经济主权','技术脱钩','基础设施控制','能源安全','供应链武器化'],
+    template: (topic, axis) => `地缘经济学的分析将${topic}视为大国战略竞争的经济表现。${axis}维度上的摩擦本质上是经济主权和安全利益的碰撞——不再是纯粹的市场竞争，而是国家力量通过贸易、技术和金融工具进行的权力博弈。供应链不再是效率最优的配置问题，而变成了战略安全的考量；基础设施控制权成为地缘影响力的延伸。在${axis}领域，经济工具正在被系统性地武器化。`
+  },
+  neoliberal_critique: {
+    name: '新自由主义批判',
+    terms: ['市场原教旨','私有化','金融化','去监管','治理术','社会责任外包'],
+    template: (topic, axis) => `新自由主义批判视角下，${topic}暴露了市场化逻辑在${axis}领域的内在局限。四十年的去监管和私有化浪潮将公共品转化为可交易的资产，将社会问题重新定义为个人责任——而${topic}正是这种"市场解决一切"信念遭遇其边界时的症状。金融化使得短期资本回报压倒长期社会投资，${axis}层面的公共治理能力被系统性掏空，留下的空洞无法由市场自发填补。`
+  },
+  regulation: {
+    name: '调节学派',
+    terms: ['积累体制','调节模式','制度形式','工资关系','货币制度','危机倾向'],
+    template: (topic, axis) => `调节学派的分析指出：${topic}是当前积累体制在${axis}维度上出现结构性断裂的信号。任何一种积累体制都需要一套与之匹配的调节模式——工资关系、货币制度、竞争形式——来维持再生产。当${axis}层面的制度形式无法继续容纳积累的动力时，危机就表现为${topic}这样的结构性冲突。这不是周期性的波动，而是积累体制本身面临转型压力的标志。`
+  },
+  dependency: {
+    name: '依附理论',
+    terms: ['依附性发展','中心-外围','不平等发展','技术依赖','贸易条件恶化','跨国资本'],
+    template: (topic, axis) => `依附理论提供了一个来自外围的视角：${topic}反映的是中心国家与外围国家在${axis}领域的不平等结构。外围国家的工业化不是自主的，而是依附性的——技术依赖、资本依赖和市场依赖共同锁定了发展轨迹。当外围国家试图在${axis}层面取得突破时，中心国家通过规则重塑来维持不对称的优势。这不是发展阶段的问题，而是结构性依附——它不会自动消失，只能通过主动脱嵌来打破。`
+  },
+  realism: {
+    name: '现实主义政治经济学',
+    terms: ['权力','国家利益','相对收益','安全困境','强制','遏制'],
+    template: (topic, axis) => `现实主义政治经济学将${topic}的根源指向权力：在${axis}领域，国家行为的最终驱动力不是绝对收益，而是相对收益和权力地位的维护。即使合作能带来总体福利的提升，国家也会因为担心对方获得更多相对优势而选择对抗。${topic}因此不是沟通失败或误解的结果，而是无政府国际体系中国家理性行为的必然产物——安全困境在经济领域的经济表达。`
   },
   keynesian: {
     name: '凯恩斯主义',
     terms: ['总需求','流动性','政府干预','经济波动','有效需求不足','乘数效应'],
-    template: (topic, fields) => `凯恩斯主义的分析聚焦于${topic}背后的有效需求问题。在${fields}领域，总需求的波动、流动性的分配不均以及预期的自我实现机制，构成了${topic}的核心驱动力。市场不会自动回归均衡——需要外部力量的干预。`
-  },
-  institutional: {
-    name: '制度经济学',
-    terms: ['激励结构','产权','交易成本','路径依赖','正式/非正式规则','制度锁定'],
-    template: (topic, fields) => `制度经济学的视角强调${topic}背后的规则系统。${fields}领域的激励设计、产权安排和历史路径依赖，解释了为什么${topic}不是纯粹的市场结果，而是特定制度框架下的均衡产出。改变规则，就能改变结果。`
+    template: (topic, axis) => `凯恩斯主义的分析聚焦于${topic}背后的有效需求问题。在${axis}维度上，总需求的波动、流动性的分配不均以及预期的自我实现机制构成了${topic}的核心驱动力。市场不会自动回归均衡——当私人部门在${axis}领域集体收缩时，唯有公共部门的逆周期干预才能打破下行螺旋。${topic}的持续恶化，恰恰证明了对市场自我调节能力的过度信任。`
   },
   behavioral: {
     name: '行为/叙事经济学',
     terms: ['预期','心理','羊群效应','叙事传播','认知偏差','FOMO'],
-    template: (topic, fields) => `行为经济学揭示了一个被传统模型忽视的维度：${topic}不仅仅是理性计算的结果，更是${fields}领域内集体心理、叙事传播和认知偏差的产物。人们不总是对现实做反应——他们对自己相信的叙事做反应。`
+    template: (topic, axis) => `行为经济学揭示了${topic}中一个重要但被忽视的维度：${axis}层面的决策不仅仅是理性计算，更是集体心理和叙事传播的产物。恐慌、贪婪和FOMO在${axis}领域像传染病一样传播——决策者、投资者和公众依据的不是事实的全部，而是他们共同相信的叙事。这种叙事一旦形成，就能自我实现：不是现实驱动了预期，而是预期重新塑造了现实。`
   }
 };
 
@@ -590,7 +645,7 @@ function heuristicWeights(topic) {
 }
 
 function rollDice(match) {
-  const fieldKeys = Object.keys(STRUCTURE_FIELDS);
+  const fieldKeys = Object.keys(STRUCTURE_REF);
   const lensKeys = Object.keys(THEORY_LENSES);
 
   // 无数据库匹配 → 启发式 fallback
@@ -620,7 +675,7 @@ function rollDice(match) {
     const altLensObj = THEORY_LENSES[altLens];
     alts.push({
       lens: altLensObj.name,
-      fields: altFields.map(f => STRUCTURE_FIELDS[f].label).join('+'),
+      fields: altFields.map(f => STRUCTURE_REF[f].label).join('+'),
       path: altLensObj.terms.slice(0, 3).join(' → ')
     });
   }
@@ -629,7 +684,7 @@ function rollDice(match) {
 }
 
 function generateCausalChain(topic, fields, lensKey, lens) {
-  const fLabels = fields.map(f => STRUCTURE_FIELDS[f].label);
+  const fLabels = fields.map(f => STRUCTURE_REF[f].label);
   const terms = lens.terms;
   const pick = (arr, n) => {
     const pool = [...arr];
@@ -648,56 +703,41 @@ function generateCausalChain(topic, fields, lensKey, lens) {
 
 function generateInsight(topic, fields, lensKey, lens) {
   const templates = [
-    `${topic}的根源不在于表面现象，而在于${STRUCTURE_FIELDS[fields[0]].label}与${STRUCTURE_FIELDS[fields[1] ? fields[1] : fields[0]].label}之间的结构张力——${lens.name}揭示了这种张力背后的${lens.terms[0]}逻辑。`,
-    `当${lens.name}的分析框架被应用到${topic}，真正暴露的不是市场失灵或政策失误，而是${STRUCTURE_FIELDS[fields[0]].label}系统内部的${lens.terms[0]}如何通过${lens.terms[1] || '结构'}被制度化地再生产。`,
-    `${topic}在${lens.name}的理论透镜下呈现为一个矛盾结构：${STRUCTURE_FIELDS[fields[0]].label}的运转逻辑与${lens.terms[0]}之间存在着不可约的张力。这不是"谁对谁错"的问题，而是"不同层级在同时运行"。`
+    `${topic}的根源不在于表面现象，而在于${STRUCTURE_REF[fields[0]].label}与${STRUCTURE_REF[fields[1] ? fields[1] : fields[0]].label}之间的结构张力——${lens.name}揭示了这种张力背后的${lens.terms[0]}逻辑。`,
+    `当${lens.name}的分析框架被应用到${topic}，真正暴露的不是市场失灵或政策失误，而是${STRUCTURE_REF[fields[0]].label}系统内部的${lens.terms[0]}如何通过${lens.terms[1] || '结构'}被制度化地再生产。`,
+    `${topic}在${lens.name}的理论透镜下呈现为一个矛盾结构：${STRUCTURE_REF[fields[0]].label}的运转逻辑与${lens.terms[0]}之间存在着不可约的张力。这不是"谁对谁错"的问题，而是"不同层级在同时运行"。`
   ];
   return templates[Math.floor(Math.random() * templates.length)];
 }
 
 function generateEssay(topic, result) {
   const lens = THEORY_LENSES[result.activeLens];
-  const fLabels = result.activeFields.map(f => STRUCTURE_FIELDS[f].label).join('与');
-  const fDescs = result.activeFields.map(f => STRUCTURE_FIELDS[f].desc);
+  const fLabels = result.activeFields.map(f => STRUCTURE_REF[f].label).join('与');
 
-  // 开场
-  const openings = [
-    `${topic}看起来是一个${fLabels}的问题，但实际上它是多重机制叠加的结果。`,
-    `当我们讨论${topic}时，我们很少意识到，同一个现象在不同的理论框架下会呈现出完全不同的因果结构。`,
-    `对${topic}的常规解释往往止步于表面，但${lens.name}的分析工具让我们看到了更深层的结构逻辑。`
-  ];
+  // 开场：锚定在话题本身
+  const opening = `${topic}在${lens.name}的分析框架下，暴露的不是表面摩擦，而是${fLabels}层面的结构性矛盾。`;
 
-  // 主干
-  const main = lens.template(topic, fLabels);
+  // 主干：一个理论贯穿，展开因果链
+  const chainDesc = result.chain.map((step, i) => {
+    const terms = lens.terms;
+    return i === result.chain.length - 1
+      ? `最终演变为${step}的格局`
+      : `${step}作用于`;
+  }).join('，');
+  const main = `${lens.name}的核心洞察在于：${chainDesc}。${lens.template(topic, fLabels)}`;
 
-  // 对照
-  const altLensKeys = Object.keys(THEORY_LENSES).filter(k => k !== result.activeLens);
-  const altLens = THEORY_LENSES[altLensKeys[Math.floor(Math.random() * altLensKeys.length)]];
-  const counter = `${altLens.name}则会给出一个完全不同的解释：${altLens.template(topic, result.activeFields[0]).substring(0, 100)}……`;
+  // 反证：不引入另一个理论，而是承认这个理论解释不了的边缘
+  const altKeys = Object.keys(THEORY_LENSES).filter(k => k !== result.activeLens);
+  const altLens = THEORY_LENSES[altKeys[Math.floor(Math.random() * altKeys.length)]];
+  const counter = `但这个分析有一个弱点：如果${result.chain[0]}本身并非问题的起点，而是更底层力量的结果——比如${altLens.terms[0]}——那么${lens.name}的分析就只描述了一个中间环节。这是这个框架的真正边界。`;
 
-  // 冲突
-  const conflicts = [
-    `${lens.name}和${altLens.name}给出的解释看似矛盾，但真正的问题是：两种解释同时成立——它们描述的不是竞争性的"真相"，而是同一结构的两个不同层级。`,
-    `这两种解释并不互斥。${lens.name}的分析聚焦于${fLabels}的深层结构，而${altLens.name}的视角捕捉了${fLabels}的行为层面。它们共同揭示了一个事实：${topic}不是单一因果链的产物。`
-  ];
-
-  // 收束
+  // 收束：判断，不提问
   const closings = [
-    `真正的问题不是"${topic}的原因是什么"，而是：当所有解释都成立时，谁在定义现实？`,
-    `${topic}的多重解释揭示了一个更深的事实：经济现象从来不是"事实"，而是"被选中的解释"。`
+    `${topic}的演变将取决于${result.chain[0]}能否被逆转——如果${result.chain[result.chain.length - 1]}成为均衡态，调整成本会随时间指数增长。`,
+    `在${result.chain.join(' → ')}这条链上，最脆弱的环节是${result.chain[1]}——它是政策可以干预的点，也是最先断裂的点。`
   ];
 
-  return [
-    openings[Math.floor(Math.random() * openings.length)],
-    '',
-    main,
-    '',
-    counter,
-    '',
-    conflicts[Math.floor(Math.random() * conflicts.length)],
-    '',
-    closings[Math.floor(Math.random() * closings.length)]
-  ].join('\n');
+  return [opening, '', main, '', counter, '', closings[Math.floor(Math.random() * closings.length)]].join('\n');
 }
 
 // ============================================================
@@ -710,18 +750,21 @@ const API_PROVIDERS = {
   custom: { endpoint: '' }
 };
 
-function buildApiPrompt(topic) { return `你是骰评·Economic Atlas 的经济分析引擎。以制度经济学的结构性视角分析以下经济现象。
+function buildApiPrompt(topic) { return `你是骰评·Economic Atlas 的经济分析引擎（V2）。分析以下经济现象的核心冲突张力。
 
 **问题：${topic}**
 
 ## 任务（4 步）
 
-第一步：判断 9 大结构场中哪些对这个现象最关键（输出 2-3 个 key）
-第二步：从 5 个理论框架中选择最匹配的 1 个
-第三步：生成一条因果链（4-5步，用 → 连接，每一步是一个具体的机制/制度/行为）
-第四步：写一篇 300-500 字的分析
+第一步：识别 2-3 个核心冲突轴（Conflict Axes）。每个冲突轴是一对张力——如"成本转移 vs 政策吸收"、"规则主导权 vs 发展空间"。每个轴下列出 2-3 个具体的运行机制。
 
-## 结构场（9 格）
+第二步：从 10 个理论透镜中选择最匹配的 1 个（见下方理论框架）。
+
+第三步：生成一条因果链（4-5步），每一步是一个具体的机制/制度/行为，用 → 连接。
+
+第四步：写一篇 300-500 字的分析，严格遵循 6 条写作规则。
+
+## 结构场参考（可选使用，共 9 格）
 production: 生产（劳动·技术·资本·效率）
 distribution: 分配（收入·财富·税收）
 demand: 需求（消费·投资·政府·外需）
@@ -732,12 +775,17 @@ narrative: 叙事（信心·预期·故事）
 cycle: 周期（扩张·过热·衰退·重构）
 external: 外部（贸易·汇率·地缘·冲击）
 
-## 理论框架
-- marx: 马克思主义（阶级·剩余价值·资本积累·商品化）
-- neoclassical: 新古典/新自由主义（市场效率·理性选择·均衡·价格信号）
-- keynesian: 凯恩斯主义（总需求·流动性·政府干预·经济波动）
+## 理论框架（10 个透镜）
 - institutional: 制度经济学（激励结构·产权·路径依赖·交易成本）
-- behavioral: 行为/叙事经济学（预期·心理·羊群效应·叙事传播）
+- marx: 马克思主义政治经济学（剩余价值·资本积累·生产关系·剥削）
+- world_systems: 世界体系理论（核心-边缘·不平等交换·结构依赖）
+- geo_economics: 地缘经济学（战略竞争·技术脱钩·供应链武器化）
+- neoliberal_critique: 新自由主义批判（市场原教旨·金融化·治理术）
+- regulation: 调节学派（积累体制·调节模式·制度形式）
+- dependency: 依附理论（依附性发展·技术依赖·贸易条件恶化）
+- realism: 现实主义政治经济学（权力·相对收益·安全困境）
+- keynesian: 凯恩斯主义（总需求·流动性·有效需求不足）
+- behavioral: 行为/叙事经济学（预期·羊群效应·叙事传播）
 
 ## 写作规则
 
@@ -772,12 +820,18 @@ external: 外部（贸易·汇率·地缘·冲击）
 
 ## 输出格式（纯 JSON，只输出 JSON）
 {
-  "structure_fields": ["institution","external"],
+  "conflict_axes": [
+    {"axis":"成本转移 vs 政策吸收","mechanisms":["碳关税","补贴竞赛","产业回流"]},
+    {"axis":"规则主导权 vs 发展空间","mechanisms":["CBAM准入","技术标准","WTO改革"]}
+  ],
   "theory_lens": "institutional",
-  "causal_chain": ["碳边境调节","出口成本上升","供应链转移","贸易脱钩制度化"],
-  "insight": "一句话洞察",
-  "essay": "300-500字分析（6条规则全部适用）",
-  "alt_paths": [{"lens":"keynesian","path":"流动性过剩 ~ 资产通胀 ~ 财富再分配"}]
+  "causal_chain": ["碳边境调节","出口成本上升","供应链转移","脱钩制度化"],
+  "insight": "一句话洞察（20-40字）",
+  "essay": "300-500字分析正文（6条规则全部适用）",
+  "competing_views": [
+    {"lens":"world_systems","claim":"核心国家通过碳规则固化边缘国家的产业依附"},
+    {"lens":"marx","claim":"碳排放权本质是剩余价值分配机制的环境化"}
+  ]
 }`; }
 
 async function callApiForEconomy(topic) {
@@ -837,6 +891,8 @@ async function startAnalysis() {
         insight: apiResult.insight || '',
         essay: apiResult.essay || '',
         alts: apiResult.alt_paths || [],
+        conflict_axes: apiResult.conflict_axes || [],
+        competing_views: apiResult.competing_views || [],
         isApi: true
       };
     }
@@ -893,18 +949,29 @@ function renderResult(result) {
     matchEl.style.display = 'none';
   }
 
+  // === V2 冲突轴 ===
+  const axesEl = document.getElementById('conflictAxes');
+  if (axesEl && result.conflict_axes && result.conflict_axes.length > 0) {
+    axesEl.innerHTML = result.conflict_axes.map(a =>
+      `<div class="conflict-axis">
+        <div class="conflict-axis-title">${a.axis.replace(' vs ', ' <span class="axis-vs">vs</span> ')}</div>
+        <div class="mechanism-tags">${(a.mechanisms||[]).map(m => `<span class="mechanism-tag">${m}</span>`).join('')}</div>
+      </div>`
+    ).join('');
+  } else if (axesEl) { axesEl.innerHTML = ''; }
+
   // 结构场
   const grid = document.getElementById('structureGrid');
-  grid.innerHTML = Object.entries(STRUCTURE_FIELDS).map(([k, v]) => {
+  grid.innerHTML = Object.entries(STRUCTURE_REF).map(([k, v]) => {
     const active = result.activeFields.includes(k) ? ' active' : '';
     return `<div class="structure-cell${active}"><span class="sc-label">${v.label}</span><span class="sc-detail">${v.detail}</span></div>`;
   }).join('');
 
   // 理论标签
   const bar = document.getElementById('theoryBar');
-  bar.innerHTML = Object.entries(THEORY_LENSES).map(([k, v]) => {
+  bar.innerHTML = Object.entries(THEORY_LENSES).slice(0,10).map(([k, v]) => {
     const active = k === result.activeLens ? ' active' : '';
-    return `<div class="theory-tag${active}">${v.name}</div>`;
+    return `<div class="theory-tag${active}" title="${v.terms.slice(0,3).join('·')}">${v.name}</div>`;
   }).join('');
 
   // 骰子路径
@@ -917,10 +984,16 @@ function renderResult(result) {
   // 洞察
   document.getElementById('diceInsight').textContent = result.insight;
 
-  // 备选路径
+  // 备选路径 / 竞争性观点
   const altPaths = document.getElementById('altPaths');
   const altContent = document.getElementById('altPathsContent');
-  if (result.alts && result.alts.length > 0) {
+  if (result.competing_views && result.competing_views.length > 0) {
+    altPaths.style.display = 'block';
+    altContent.innerHTML = result.competing_views.map(v => {
+      const lensName = (THEORY_LENSES[v.lens] && THEORY_LENSES[v.lens].name) || v.lens;
+      return `<div class="alt-path-row"><strong>${lensName}:</strong> ${v.claim}</div>`;
+    }).join('');
+  } else if (result.alts && result.alts.length > 0) {
     altPaths.style.display = 'block';
     altContent.innerHTML = result.alts.filter(a => a.path).map(a => {
       const aFields = Array.isArray(a.fields) ? a.fields.join('+') : (a.fields || '');
@@ -979,7 +1052,7 @@ function renderShareCard(result) {
 
   // 结构场迷你网格
   const grid = document.getElementById('shareCardGrid');
-  grid.innerHTML = Object.entries(STRUCTURE_FIELDS).map(([k, v]) => {
+  grid.innerHTML = Object.entries(STRUCTURE_REF).map(([k, v]) => {
     const active = result.activeFields.includes(k) ? ' active' : '';
     return `<div class="share-card-mini-cell${active}">${v.label}</div>`;
   }).join('');
