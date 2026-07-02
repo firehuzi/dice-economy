@@ -818,11 +818,10 @@ external: 外部（贸易·汇率·地缘·冲击）
 6. 因果链的每一步都要出现在正文中
    你生成的 causal_chain 中每一个节点必须是对正文中实际提到的一个机制的压缩命名。不能生造因果链然后正文里不出现。
 
-## 输出格式（纯 JSON，只输出 JSON）
+## 输出格式（纯 JSON，只输出 JSON，禁止省略任何字段）
 {
   "conflict_axes": [
-    {"axis":"成本转移 vs 政策吸收","mechanisms":["碳关税","补贴竞赛","产业回流"]},
-    {"axis":"规则主导权 vs 发展空间","mechanisms":["CBAM准入","技术标准","WTO改革"]}
+    {"axis":"成本转移 vs 政策吸收","mechanisms":["碳关税","补贴竞赛","产业回流"]}
   ],
   "theory_lens": "institutional",
   "causal_chain": ["碳边境调节","出口成本上升","供应链转移","脱钩制度化"],
@@ -832,7 +831,16 @@ external: 外部（贸易·汇率·地缘·冲击）
     {"lens":"world_systems","claim":"核心国家通过碳规则固化边缘国家的产业依附"},
     {"lens":"marx","claim":"碳排放权本质是剩余价值分配机制的环境化"}
   ]
-}`; }
+}
+
+要求：
+- conflict_axes 必须有 2 到 3 条
+- 每个 mechanisms 必须包含 2 到 3 个具体机制
+- theory_lens 必须是 10 个理论 key 之一
+- causal_chain 必须有 4 到 5 步
+- insight 必须 20-40 字
+- essay 必须 300-500 字
+- competing_views 必须包含 2 条其他理论的解释，每条有 lens 和 claim 字段`; }
 
 async function callApiForEconomy(topic) {
   const apiKey = document.getElementById('apiKey').value.trim();
@@ -851,14 +859,20 @@ async function callApiForEconomy(topic) {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, messages: [{ role: 'user', content: buildApiPrompt(topic) }], temperature: 0.7, max_tokens: 1200 })
+      body: JSON.stringify({ model, messages: [{ role: 'user', content: buildApiPrompt(topic) }], temperature: 0.7, max_tokens: 1600 })
     });
     if (!response.ok) return null;
     const data = await response.json();
     const text = data.choices?.[0]?.message?.content?.trim() || '';
     if (!text) return null;
     let jsonStr = text.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '').trim();
-    return JSON.parse(jsonStr);
+    const result = JSON.parse(jsonStr);
+    // 校验：必须有核心字段
+    if (!result.theory_lens || !result.causal_chain || !result.essay || result.causal_chain.length === 0) {
+      console.warn('API 返回不完整，回退模板引擎', result);
+      return null;
+    }
+    return result;
   } catch(err) { console.error('API调用失败:', err); return null; }
 }
 
@@ -899,6 +913,7 @@ async function startAnalysis() {
   }
 
   if (!result) {
+    if (engineMode === 'api') showToast('AI 返回不完整，已切换为模板引擎');
     const dice = rollDice(match);
     const essay = generateEssay(topic, dice);
     result = {
