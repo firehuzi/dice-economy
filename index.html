@@ -402,6 +402,9 @@ body { font-family: var(--serif); background: var(--bg); color: var(--black); mi
   <div class="section-label">⚡ 冲突轴（Conflict Axes）</div>
   <div class="conflict-axes" id="conflictAxes"></div>
 
+  <div class="section-label">📊 结构场参考（9格）</div>
+  <div class="structure-grid" id="structureGrid"></div>
+
   <div class="section-label">🧠 理论视角（10个透镜）</div>
   <div class="theory-bar" id="theoryBar"></div>
 
@@ -974,7 +977,7 @@ function renderResult(result) {
 
   // 结构场
   const grid = document.getElementById('structureGrid');
-  grid.innerHTML = Object.entries(STRUCTURE_REF).map(([k, v]) => {
+  if (grid) grid.innerHTML = Object.entries(STRUCTURE_REF).map(([k, v]) => {
     const active = result.activeFields.includes(k) ? ' active' : '';
     return `<div class="structure-cell${active}"><span class="sc-label">${v.label}</span><span class="sc-detail">${v.detail}</span></div>`;
   }).join('');
